@@ -1,9 +1,8 @@
-/**
- * todo: Dodati options za svaki tip engina.
- * todo: Dodati UserAgente i proxije
- * todo: Doterati klase jos malo, bolje hendluj neke greske, logove prebaciti u logger
- * todo: Engine povezati sa workerima odnosno scrapere sa workerima
- * todo: Srediti klasu Request jos malo i dodati staticki metod post
+﻿/**
+ * todo: Add options for engine type.
+ * todo: Add UserAgents and Proxies
+ * todo: Add error handling and logger 
+ * todo: Add static meethod post
  * */
 
 const autoloader = require('auto-loader');
