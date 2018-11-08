@@ -1,0 +1,29 @@
+{
+  "name": "motors",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "anticaptcha": "^1.0.4",
+    "auto-loader": "^0.2.0",
+    "bluebird": "^3.5.2",
+    "captcha-solver": "0.0.6",
+    "cheerio": "^1.0.0-rc.2",
+    "dotenv": "^6.1.0",
+    "fs": "0.0.1-security",
+    "mysql2": "^1.6.1",
+    "os": "^0.1.1",
+    "path": "^0.12.7",
+    "promise-queue": "^2.2.5",
+    "puppeteer": "^1.4.0",
+    "request": "^2.88.0",
+    "sequelize": "^4.41.0",
+    "winston": "^3.1.0",
+    "winston-loggly-bulk": "^2.0.3"
+  }
+}
