@@ -1,5 +1,5 @@
 const request = require('request');
-
+const fs = require('fs')
 
 class Request{
 
@@ -20,6 +20,9 @@ class Request{
         let obj= {
             url:url,
             method:'get',
+            ca: fs.readFileSync(`${__dirname}/../../crawlera-ca.crt`),
+            requestCert: true,
+            rejectUnauthorized: true,
             //jar: true,
             maxRedirects: 'maxRedirects' in options ? options.maxRedirects : this.maxRedirects,
             encoding: 'encoding' in options ? options.encoding : this.encoding,
@@ -37,7 +40,7 @@ class Request{
 
 
         (function loop(i){
-            // obj.proxy = 'http://'+proxylist[Math.floor(Math.random() * proxylist.length)];
+            obj.proxy = 'http://18a4453ab71141c7bada9d4b98cf74d1:@proxy.crawlera.com:8010';
             request.get(obj, (err, response, body) => {
                 if(err){
                     if(i > 7){

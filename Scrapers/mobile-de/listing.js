@@ -11,17 +11,17 @@ class Listing extends mobilede {
         this.type = type;
     }
 
-    Run(job, options) {
+    Run(job) {
         return new Promise(async (resolve, reject) => {
             let that = this, url;
             let links = ['https://suchen.mobile.de/fahrzeuge/search.html?cn=PL&damageUnrepaired=NO_DAMAGE_UNREPAIRED&grossPrice=false&isSearchRequest=true&lang=en&makeModelVariant1.makeId=12100&maxPowerAsArray=PS&minPowerAsArray=PS&scopeId=STT&usage=USED&searchId=e18f85c4-d6a5-28b6-8de9-4eb1349d9191'];
-           // links.push(job.start_url);
-            const engine = new Engine(that.type);
-            await engine.initialize(options)
+            //links.push(job.start_url);
+            const engine = await Engine.create(this.type, this.EngineOptions)
                 .catch(err => {
                     console.error(err, 'Failed to initialize search engine. Aborting.');
-                    reject(err)
+                    return reject(err)
                 });
+
             (async function loop(i) {
                 if(links[i] === undefined){
                     engine.close()
@@ -30,41 +30,51 @@ class Listing extends mobilede {
                 let url = links[i];
                 const response = await engine.get(url, {})
                     .catch(err => {
-                        reject(err)
+                        engine.close()
+                        return reject(err)
                     })
-                let $ = that.cheerio.load(response.html);
-                let scope = url.split('scopeId=')[1].split('&')[0];
-                let usage = url.split('usage=')[1].split('&')[0];
-                let country_code = url.split('cn=')[1].split('&')[0];
-                let brand_code = url.split('makeModelVariant1.makeId=')[1].split('&')[0];
-                let brand = ''
-                let url_obj = {
-                    'condition': usage,
-                    'country_code': country_code,
-                    'brand_': brand_code,
-                    'brand_id': brand,
-                    'scope': scope
+                try {
+                    let $ = that.cheerio.load(response.html);
+                    let scope = url.split('scopeId=')[1].split('&')[0];
+                    let usage = url.split('usage=')[1].split('&')[0];
+                    let country_code = url.split('cn=')[1].split('&')[0];
+                    let brand_code = url.split('makeModelVariant1.makeId=')[1].split('&')[0];
+                    let brand = await that.DB.getBrand(that.source_id,brand_code);
+                    let url_obj = {
+                        'condition': usage,
+                        'country_code': country_code,
+                        'brand_': brand_code,
+                        'brand_id': brand,
+                        'scope': scope,
+                        'source_id':that.source_id,
+                        'origin_url':url
+                    }
+                    let pagination = $('ul.pagination li');
+                    for(let p = 0; p < pagination.length; p++){
+                        console.log($(pagination[p]).find('span').attr('data-href'));
+                        if(links.indexOf($(pagination[p]).attr('data-href')) === -1 && !$(pagination[p]).hasClass('padding-first-button') && $(pagination[p]).find('span').attr('data-href'))
+                            links.push($(pagination[p]).find('span').attr('data-href'))
+                    }
+                    if($('title').text().indexOf('Are you a human')>-1){
+                        await engine.request.Page.waitForSelector('div.antigate_solver.recaptcha.solved',{'timeout':200000});
+                        await engine.request.Page.click('.btn.btn--orange.u-full-width');
+                        await engine.request.Page.waitForNavigation();
+                        let Body  = await engine.request.Page.content();
+                        $ = that.cheerio.load(Body);
+                        that.ParsePage($, url_obj, function () {
+                            return loop(++i);
+                        })
+                    }else{
+                        that.ParsePage($, url_obj, function () {
+                            return loop(++i);
+                        })
+                    }
                 }
-                let pagination = $('ul.pagination li');
-                for(let p = 0; p < pagination.length; p++){
-                    console.log($(pagination[p]).find('span').attr('data-href'));
-                    if(links.indexOf($(pagination[p]).attr('data-href')) === -1 && !$(pagination[p]).hasClass('padding-first-button') && $(pagination[p]).find('span').attr('data-href'))
-                        links.push($(pagination[p]).find('span').attr('data-href'))
+                catch (e) {
+                    console.error(e)
+                    return loop(++i)
                 }
-                if($('title').text().indexOf('Are you a human')>-1){
-                    await engine.request.Page.waitForSelector('div.antigate_solver.recaptcha.solved',{'timeout':200000});
-                    await engine.request.Page.click('.btn.btn--orange.u-full-width');
-                    await engine.request.Page.waitForNavigation();
-                    let Body  = await engine.request.Page.content();
-                    $ = that.cheerio.load(Body);
-                    that.ParsePage($, url_obj, function () {
-                        return loop(++i);
-                    })
-                }else{
-                    that.ParsePage($, url_obj, function () {
-                        return loop(++i);
-                    })
-                }
+
             })(0)
         })
     }
@@ -96,16 +106,21 @@ class Listing extends mobilede {
                 url_obj['price_net']= price_net;
                 url_obj['price_gross']= offer_id;
                 url_obj['vat']= vat;
-                that.SaveInfo(url_obj);
+                url_obj['currency']= 'EUR';
+                url_obj['url'] = url;
+                that.SaveInfo(url_obj,1,that.name);
             }
             return callback('done')
-        }catch(e){
+        }
+        catch(e){
             console.log(e);
+            return callback(e, null)
         }
     }
 
-    SaveInfo(info) {
-        console.log(info)
+    async SaveInfo(info,sequence_id,name) {
+        let that=this;
+        await that.DB.insertListing(info,sequence_id,name);
     }
 }
 

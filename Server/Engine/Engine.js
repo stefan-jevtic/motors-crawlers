@@ -1,11 +1,9 @@
-﻿/**
- * todo: Add options for engine type.
- * todo: Add UserAgents and Proxies
- * todo: Add error handling and logger 
- * todo: Add static meethod post
+/**
+ * todo: error handling in logger
  * */
 
 const autoloader = require('auto-loader');
+const UserAgents = require('./UserAgents');
 
 class Engine {
 
@@ -28,9 +26,18 @@ class Engine {
         })
     }
 
+    static create(type, options){
+        return new Promise(async(resolve, reject) => {
+            options.UserAgent = UserAgents[Math.floor(Math.random() * UserAgents.length)];
+            const i = new Engine(type)
+            await i.initialize(options)
+                .catch(err => reject(err))
+            resolve(i)
+        })
+    }
+
     get(url, options){
         return new Promise(async (resolve, reject) => {
-
             this.request.goto(url, options, (err, res) => {
                 if(err)
                     reject(err);

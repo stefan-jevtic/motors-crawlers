@@ -3,8 +3,13 @@ const puppeteer = require('puppeteer');
 class Chrome{
 
     constructor(options){
-        this.options = options
-        this.path = '/home/kica/.config/chromium/Default/Extensions/lncaoejhfdpcafpkkcddpjnhnodcajfg/0.3003_0'
+        this.width = 'width' in options ? options.width : 1366;
+        this.height = 'heigth' in options ? options.heigth : 766;
+        this.timeout = 'timeout' in options ? options.timeout : 30000;
+        this.waitUntil = 'waitUntil' in options ? options.waitUntil : 'networkidle0'
+        this.UserAgent = options.UserAgent;
+        this.path = '/home/obrad/.config/chromium/Default/Extensions/lncaoejhfdpcafpkkcddpjnhnodcajfg/0.3003_0';  // PATH TO CHROMIUM EXTENSION FOR ANTICAPTCHA
+
     }
 
     init(){
@@ -18,19 +23,19 @@ class Chrome{
     OpenBrowser(){
         return new Promise(async (resolve, reject) => {
             const browser = await puppeteer.launch({
+                ignoreHTTPSErrors:true,
                 args:[
-                    // '--proxy-server=',
+                //    '--proxy-server=proxy.crawlera.com:8010',
                     '--ignore-certificate-errors',
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
-                    '--load-extension='+this.path+'',
-                    '--disable-extensions-except='+this.path+'',
                     //   '--disable-translate',
                     //  '--disable-extensions',
                     //   '--disable-sync'
+                    '--disable-extensions-except='+this.path+'',
+                    '--load-extension='+this.path+''
                 ],
                 headless:false,
-                'ignoreHTTPSErrors':true,
             })
                 .catch(err => {
                     console.error(err);
@@ -38,9 +43,11 @@ class Chrome{
                 });
             this.Browser = browser;
             this.Page = await browser.newPage().catch(err => reject(err));
-            // await this.Page.authenticate({ username:this.username, password:this.password }).catch(err => reject(err));
-            await this.Page.setViewport({width: 1366, height: 768}).catch(err => reject(err));
-            // await this.Page.setUserAgent(randomUserAgents).catch(err => reject(err));
+            await this.Page.setExtraHTTPHeaders({
+                'Proxy-Authorization': 'Basic ' + Buffer.from('18a4453ab71141c7bada9d4b98cf74d1:').toString('base64')
+            });
+            await this.Page.setViewport({width: this.width, height: this.height}).catch(err => reject(err));
+            await this.Page.setUserAgent(this.UserAgent).catch(err => reject(err));
             resolve(this.Page);
         })
     }
@@ -75,10 +82,8 @@ class Chrome{
 
                 let response = await that.Page.goto(url, {
                     'timeout':that.timeout,
-                    waitUntil:'networkidle0'
-                }).catch(err => {
-                    return callback(err, null)
-                });
+                    waitUntil:that.waitUntil
+                })
 
 
                 let headers = response['_headers'];
@@ -146,7 +151,9 @@ class Chrome{
                     return loop(++i);
                 }
 
-                await that.CloseBrowser();
+                await that.CloseBrowser()
+                    .then(() => console.log('Browser closed in loop, repeating...'))
+                    .catch(err => console.log('Failed to close browser in loop.'));
                 that.Page = await that.OpenBrowser()
                     .catch(err => {
                         console.error(err)

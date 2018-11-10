@@ -1,24 +1,23 @@
-const Test = require('../../Scrapers/Test');
-const Listing = require('../../Scrapers/mobilede/listing');
 const Queue = require('promise-queue');
-const sequelize = require('../../Models/index').sequelize;
+const sequelize = require('../Models/index').sequelize;
 
-class TestWorker {
+class DetailWorker {
 
     constructor(spider, engine){
         this.queueConcurrency = 1; //parseInt(process.env.DETAIL_MAX_CONCURRENCY);
         this.queueInterval = 5000; //parseInt(process.env.DETAIL_INTERVAL);
         this.queueLimit = 1; // parseInt(process.env.MAX_COMPETITOR_QUEUE)
-        this.test = new Listing(engine);
+        const Detail = require(`../Scrapers/${spider}/detail`);
+        this.test = new Detail(engine);
         this.spider = spider;
-        this.dq = require('../../Models/').detail_queue;
+        this.dq = require('../Models/index').detail_queue;
         Queue.configure(Promise);
         this.queue = new Queue(this.queueConcurrency, this.queueLimit)
         this.counter = 0
     }
 
     pop(num){
-        const q = `SELECT * FROM listing_queue WHERE spider=:spider AND (finished_at IS NULL OR finished_at<(NOW() - INTERVAL 3 DAY)) AND num_failures < 5 LIMIT 3`
+        const q = `SELECT * FROM detail_queue WHERE spider=:spider AND (finished_at IS NULL OR finished_at<(NOW() - INTERVAL 3 DAY)) AND num_failures < 5 LIMIT 3`
         return sequelize.query(q, {
             replacements: { spider: this.spider},
             type: sequelize.QueryTypes.SELECT
@@ -73,8 +72,10 @@ class TestWorker {
         }
         console.log('================> Getting new set of jobs <================')
         const jobs = await this.pop(0), that = this;
-        if(jobs.length === 0)
+        if(jobs.length === 0){
+            console.log('Finished');
             return false;
+        }
         (async function loop(i) {
             if(jobs[i] === undefined){
                 if(that.queue.pendingPromises === 0){
@@ -108,4 +109,4 @@ class TestWorker {
     }
 }
 
-module.exports = TestWorker;
+module.exports = DetailWorker;
