@@ -14,8 +14,8 @@ class Listing extends mobilede {
     Run(job) {
         return new Promise(async (resolve, reject) => {
             let that = this, url;
-            let links = ['https://suchen.mobile.de/fahrzeuge/search.html?cn=DE&damageUnrepaired=NO_DAMAGE_UNREPAIRED&isSearchRequest=true&makeModelVariantExclusions%5B0%5D.makeId=3500&maxPowerAsArray=PS&minPowerAsArray=PS&scopeId=C&sfmr=false&usage=USED'];
-            //links.push(job.start_url);
+            let links=[];
+            links.push(job.start_url);
             const engine = await Engine.create(this.type, this.EngineOptions)
                 .catch(err => {
                     console.error(err, 'Failed to initialize search engine. Aborting.');
