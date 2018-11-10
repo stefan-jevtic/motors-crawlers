@@ -1,12 +1,3 @@
-/**
- * todo: Dodati options za svaki tip engina.
- * todo: Dodati UserAgente i proxije --> DONE
- * todo: Doterati klase jos malo, bolje hendluj neke greske, logove prebaciti u logger ---> DONE
- * todo: Engine povezati sa workerima odnosno scrapere sa workerima ---> DONE
- * todo: Srediti klasu Request jos malo i dodati staticki metod post
- * todo: OBAVEZNO! initialize da se poziva prilikom instanciranja, da ne zovemo u svakom skrejperu tu f-ju --> DONE
- * */
-
 const autoloader = require('auto-loader');
 const UserAgents = require('./UserAgents');
 
