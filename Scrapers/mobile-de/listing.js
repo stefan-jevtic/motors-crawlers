@@ -14,7 +14,7 @@ class Listing extends mobilede {
     Run(job) {
         return new Promise(async (resolve, reject) => {
             let that = this, url;
-            let links = ['https://suchen.mobile.de/fahrzeuge/search.html?cn=PL&damageUnrepaired=NO_DAMAGE_UNREPAIRED&grossPrice=false&isSearchRequest=true&lang=en&makeModelVariant1.makeId=12100&maxPowerAsArray=PS&minPowerAsArray=PS&scopeId=STT&usage=USED&searchId=e18f85c4-d6a5-28b6-8de9-4eb1349d9191'];
+            let links = ['https://suchen.mobile.de/fahrzeuge/search.html?cn=DE&damageUnrepaired=NO_DAMAGE_UNREPAIRED&isSearchRequest=true&makeModelVariantExclusions%5B0%5D.makeId=3500&maxPowerAsArray=PS&minPowerAsArray=PS&scopeId=C&sfmr=false&usage=USED'];
             //links.push(job.start_url);
             const engine = await Engine.create(this.type, this.EngineOptions)
                 .catch(err => {

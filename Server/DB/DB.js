@@ -172,11 +172,7 @@ class Database {
 
 
     insertDetail(item,reseller_item){
-            let that=this;
-
-
-
-
+        let that=this;
         that.insert_attributes(item['attribute_key'],
             item['value'],
             item['source_id'],
@@ -206,16 +202,11 @@ class Database {
             if(reseller){
                 reseller_id = reseller['id'];
             }else{
-
-
+                console.log('Geo api needed')
             }
         }
 
-
-
     }
-
-
 
     update_offer_dealer(reseller_id,offer_id,source_id){
         DB.sequelize.query('UPDATE offers_mapping SET dealer_id=? WHERE offer_id=? AND source_id=? AND dealer_id IS NULL',
@@ -228,13 +219,7 @@ class Database {
                 type: DB.sequelize.QueryTypes.UPDATE
             })
             .then(result => {  })
-
-
-
     }
-
-
-
 
     update_offer_description(desc,offer_id,source_id){
         DB.sequelize.query('UPDATE offers_mapping SET description=? WHERE offer_id= ? AND source_id= ? AND description IS NULL',
@@ -313,69 +298,3 @@ class Database {
 }
 
 module.exports=Database;
-
-/*
-
-    def store_detail_items(self, items, reseller_items):
-        rows = []
-        desc = None
-        title = None
-        source_id = None
-        offer_id = None
-        photo_url = None
-
-        for item in items:
-            if item['attribute_key']=='description':
-                offer_id = item['offer_id']
-                source_id = item['source_id']
-                desc = item['value']
-            elif item['attribute_key']=='title':
-                offer_id = item['offer_id']
-                source_id = item['source_id']
-                title = item['value']
-            elif item['attribute_key']=='photo_url':
-                offer_id = item['offer_id']
-                source_id = item['source_id']
-                photo_url = item['value']
-            else:
-                row = (
-                    item['attribute_key'],
-                    item['value'],
-                    item['source_id'],
-                    item['offer_id'],
-                    item['is_option'],
-                    item['checked'],
-                    datetime.datetime.now(),
-                    datetime.datetime.now(),
-                )
-                rows.append(row)
-
-        reseller = None
-        reseller_id = None
-        if len(reseller_items)>0:
-            reseller = self.get_reseller(reseller_items[0])
-            if reseller:
-                reseller_id = reseller['id']
-            else:
-                reseller_data = self.enrich_reseller(reseller_items[0])
-                reseller_id = self.create_reseller(reseller_data)
-
-        # store new data
-        self.insert_attributes(rows)
-
-        # update offer_mapping dealer
-        self.update_offer_dealer(reseller_id, offer_id, source_id)
-
-        if desc:
-            self.update_offer_description(desc, offer_id, source_id)
-
-        if title:
-            self.update_offer_title(title, offer_id, source_id)
-
-        if photo_url:
-            self.update_offer_photo_url(photo_url, offer_id, source_id)
-
-
-
-
- */

@@ -1,4 +1,6 @@
+require('./common/config')
 const autoloader = require('auto-loader');
+const _ = require('lodash')
 if(process.argv.length !== 5)
     throw new Error('Wrong number of arguments! Expect 3: <SPIDER> <TYPE> <ENGINE>')
 const spider = process.argv[2];
@@ -15,3 +17,12 @@ const Worker = autoloader.load(`${__dirname}/Workers/`)[`${worker}.worker`];
 const w = new Worker(spider, engine);
 w.crawl()
 .catch(err => console.log(err));
+
+process.on('unhandledRejection', reason => {
+    global.loger.error(`Unhandled Rejection: ${reason}`);
+    if(_.isObject(reason) && reason.message)
+        global.AlertSvc('Motors Listing Worker Unhandled Rejection: '+reason.message);
+    else
+        global.AlertSvc('Motors Listing Worker Unhandled Rejection: '+reason);
+    process.exit(1);
+});

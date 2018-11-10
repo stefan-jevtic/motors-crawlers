@@ -34,9 +34,19 @@ class DetailWorker {
 
     singleJob(job){
         return new Promise(async (resolve, reject) => {
-            await this.test.Run(job)
+            this.test.Run(job)
+                .then(async () => {
+                    await this.push(job.id, {
+                        finished_at: new Date(),
+                        run_sequence_id: job.run_sequence_id+1
+                    })
+                    global.AlertSvc(`${this.spider} detail job finished ${job.id}`)
+                    global.loger.info(`${this.spider} detail job finished ${job.id}`)
+                    resolve()
+                })
                 .catch(async err => {
-                    console.error(err)
+                    global.loger.error(err)
+                    global.AlertSvc(`${this.spider} detail job error ${job.id}: ${e.message}`)
                     if(job.num_failures < 5){
                         await this.push(job.id, {
                             num_failures: job.num_failures+1
@@ -44,54 +54,47 @@ class DetailWorker {
                         reject(err)
                     }
                     else {
+                        global.loger.warn(`${this.spider} detail job: ${job.id} skipped for too many failures`)
+                        global.AlertSvc(`${this.spider} detail job: ${job.id} skipped for too many failures`)
                         await this.push(job.id, {
                             num_failures: job.num_failures+1
                         })
-                        console.warn(`Mobile.de Detail Job ${job.id} skipped for too many failures`)
                         reject(err)
                     }
                 })
-            await this.push(job.id, {
-                finished_at: new Date(),
-                run_sequence_id: job.run_sequence_id+1
-            })
-
-            console.log(`Mobile.de detail job finished ${job.id}`)
-            resolve()
         })
-
     }
 
     async crawl(){
         /**
-         * todo: Uncomment code below if you want to test for 2 * 10 records
+         * todo: Uncomment code below if you want to test for 2 * x records
          * */
-        if(++this.counter > 2){
-            console.log('Finished');
-            return false;
-        }
-        console.log('================> Getting new set of jobs <================')
+        // if(++this.counter > 2){
+        //     console.log('Finished');
+        //     return false;
+        // }
+        global.loger.info(`================> Getting new set of jobs <================`)
         const jobs = await this.pop(0), that = this;
         if(jobs.length === 0){
-            console.log('Finished');
+            global.loger.info(`Finished.`)
             return false;
         }
         (async function loop(i) {
             if(jobs[i] === undefined){
                 if(that.queue.pendingPromises === 0){
-                    console.log('All finished, return')
+                    global.loger.info(`All finished, return`)
                     return that.crawl()
                 }
                 else {
                     await that.delay(1000)
-                    console.log('Waiting for all jobs finish...')
+                    global.loger.debug(`Waiting for all jobs finish...`)
                     return loop(i)
                 }
             }
             const job = jobs[i]
             const queueCapacity = that.queueLimit - that.queue.getQueueLength()
             if(queueCapacity <= 0){
-                console.warn('queue full --> waiting....')
+                global.loger.debug(`queue full --> waiting....`)
                 await that.delay(2000)
                 return loop(i)
             }
@@ -99,7 +102,7 @@ class DetailWorker {
                 await that.singleJob(job)
                     .catch(err => console.log(err))
             })
-            console.log(`Currently working: ${that.queue.pendingPromises}/${that.queue.maxPendingPromises}; Queued: ${that.queue.getQueueLength()}/${that.queue.maxQueuedPromises}`)
+            global.loger.debug(`Currently working: ${that.queue.pendingPromises}/${that.queue.maxPendingPromises}; Queued: ${that.queue.getQueueLength()}/${that.queue.maxQueuedPromises}`)
             return loop(++i)
         })(0)
     }
