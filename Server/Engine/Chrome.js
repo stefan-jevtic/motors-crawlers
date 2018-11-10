@@ -25,7 +25,7 @@ class Chrome{
             const browser = await puppeteer.launch({
                 ignoreHTTPSErrors:true,
                 args:[
-                //    '--proxy-server=proxy.crawlera.com:8010',
+                    '--proxy-server=proxy.crawlera.com:8010',
                     '--ignore-certificate-errors',
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
