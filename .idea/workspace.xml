@@ -1,18 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2ed2c19b-8667-4531-bd49-7984d985f687" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scrapers/Test.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scrapers/mobile-de/listing.js" beforeDir="false" afterPath="$PROJECT_DIR$/Scrapers/mobile-de/listing.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/DB/DB.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/DB/DB.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Workers/detail.worker.js" beforeDir="false" afterPath="$PROJECT_DIR$/Workers/detail.worker.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Workers/listing.worker.js" beforeDir="false" afterPath="$PROJECT_DIR$/Workers/listing.worker.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Workers/test.worker.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/run.js" beforeDir="false" afterPath="$PROJECT_DIR$/run.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/runlisting.js" beforeDir="false" />
-    </list>
+    <list default="true" id="2ed2c19b-8667-4531-bd49-7984d985f687" name="Default Changelist" comment="" />
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
     <ignored path="$PROJECT_DIR$/tmp/" />
@@ -69,7 +58,7 @@
         <entry file="file://$PROJECT_DIR$/Server/DB/DB.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="1290">
-              <caret line="86" column="69" lean-forward="true" selection-start-line="86" selection-start-column="46" selection-end-line="86" selection-end-column="69" />
+              <caret line="86" column="69" selection-start-line="86" selection-start-column="46" selection-end-line="86" selection-end-column="69" />
             </state>
           </provider>
         </entry>
@@ -86,11 +75,7 @@
       </file>
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Scrapers/mobile-de/mobilede.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret lean-forward="true" />
-            </state>
-          </provider>
+          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
@@ -176,6 +161,22 @@
               <item name="motorsPuppeteer" type="b2602c69:ProjectViewProjectNode" />
               <item name="motorsPuppeteer" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="motorsPuppeteer" type="b2602c69:ProjectViewProjectNode" />
+              <item name="motorsPuppeteer" type="462c0819:PsiDirectoryNode" />
+              <item name="common" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="motorsPuppeteer" type="b2602c69:ProjectViewProjectNode" />
+              <item name="motorsPuppeteer" type="462c0819:PsiDirectoryNode" />
+              <item name="Scrapers" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="motorsPuppeteer" type="b2602c69:ProjectViewProjectNode" />
+              <item name="motorsPuppeteer" type="462c0819:PsiDirectoryNode" />
+              <item name="Scrapers" type="462c0819:PsiDirectoryNode" />
+              <item name="mobile-de" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -215,15 +216,16 @@
       <workItem from="1541669561347" duration="570000" />
       <workItem from="1541752648870" duration="715000" />
       <workItem from="1541837177484" duration="4046000" />
-      <workItem from="1541883008779" duration="573000" />
+      <workItem from="1541883008779" duration="844000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="5904000" />
+    <option name="totallyTimeSpent" value="6175000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="55" y="30" width="1865" height="1050" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24945652" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -270,7 +272,7 @@
     <entry file="file://$PROJECT_DIR$/Server/DB/DB.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1290">
-          <caret line="86" column="69" lean-forward="true" selection-start-line="86" selection-start-column="46" selection-end-line="86" selection-end-column="69" />
+          <caret line="86" column="69" selection-start-line="86" selection-start-column="46" selection-end-line="86" selection-end-column="69" />
         </state>
       </provider>
     </entry>
@@ -281,11 +283,7 @@
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/Scrapers/mobile-de/mobilede.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret lean-forward="true" />
-        </state>
-      </provider>
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/Server/Engine/Chrome.js">
       <provider selected="true" editor-type-id="text-editor">

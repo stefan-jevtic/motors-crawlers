@@ -3,12 +3,12 @@ const puppeteer = require('puppeteer');
 class Chrome{
 
     constructor(options){
-        this.width = 'width' in options ? options.width : 1366;
-        this.height = 'heigth' in options ? options.heigth : 766;
-        this.timeout = 'timeout' in options ? options.timeout : 30000;
+        this.width = 'width' in options ? options.width : 1366
+        this.height = 'heigth' in options ? options.heigth : 766
+        this.timeout = 'timeout' in options ? options.timeout : 30000
         this.waitUntil = 'waitUntil' in options ? options.waitUntil : 'networkidle0'
         this.UserAgent = options.UserAgent;
-        this.path = '/home/obrad/.config/chromium/Default/Extensions/lncaoejhfdpcafpkkcddpjnhnodcajfg/0.3003_0';  // PATH TO CHROMIUM EXTENSION FOR ANTICAPTCHA
+        this.path = '';  // PATH TO CHROMIUM EXTENSION FOR ANTICAPTCHA
 
     }
 
