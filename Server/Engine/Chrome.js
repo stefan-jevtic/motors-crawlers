@@ -6,7 +6,7 @@ class Chrome{
         this.width = 'width' in options ? options.width : 1366
         this.height = 'heigth' in options ? options.heigth : 766
         this.timeout = 'timeout' in options ? options.timeout : 30000
-        this.waitUntil = 'waitUntil' in options ? options.waitUntil : 'networkidle0'
+        this.waitUntil = 'waitUntil' in options ? options.waitUntil : 'networkidle0';
         this.UserAgent = options.UserAgent;
         this.path = __dirname+'/../../Utils/AntiCaptcha/';
 
@@ -25,7 +25,7 @@ class Chrome{
             const browser = await puppeteer.launch({
                 ignoreHTTPSErrors:true,
                 args:[
-                    '--proxy-server=proxy.crawlera.com:8010',
+                    '--proxy-server='+process.env.PROXY_SERVER,
                     '--ignore-certificate-errors',
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
@@ -43,9 +43,15 @@ class Chrome{
                 });
             this.Browser = browser;
             this.Page = await browser.newPage().catch(err => reject(err));
-            await this.Page.setExtraHTTPHeaders({
-                'Proxy-Authorization': 'Basic ' + Buffer.from('18a4453ab71141c7bada9d4b98cf74d1:').toString('base64')
-            });
+            if(process.env.PROXY_TYPE === 'crawlera'){
+                await this.Page.setExtraHTTPHeaders({
+                    'Proxy-Authorization': 'Basic ' + Buffer.from(process.env.PROXY_KEY).toString('base64')
+                });
+            }
+            else{
+                await this.Page.authenticate({ username: process.env.PROXY_USERNAME, password: process.env.PROXY_PASSWORD });
+            }
+
             await this.Page.setViewport({width: this.width, height: this.height}).catch(err => reject(err));
             await this.Page.setUserAgent(this.UserAgent).catch(err => reject(err));
             resolve(this.Page);
