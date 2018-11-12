@@ -27,7 +27,7 @@ class Request{
             maxRedirects: 'maxRedirects' in options ? options.maxRedirects : this.maxRedirects,
             encoding: 'encoding' in options ? options.encoding : this.encoding,
             headers: {
-                'User-Agent': options.agent ? options.agent : 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36',
+                'User-Agent': options.UserAgent,
                 'X-Forwarded-For':'',
                 'max-forwards':10,
                 'Connection': 'close',
@@ -40,7 +40,8 @@ class Request{
 
 
         (function loop(i){
-            obj.proxy = 'http://18a4453ab71141c7bada9d4b98cf74d1:@proxy.crawlera.com:8010';
+            if(process.env.PROXY_TUNNEL)
+                obj.proxy = process.env.PROXY_TUNNEL;
             request.get(obj, (err, response, body) => {
                 if(err){
                     if(i > 7){
