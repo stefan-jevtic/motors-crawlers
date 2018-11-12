@@ -22,19 +22,21 @@ class Chrome{
 
     OpenBrowser(){
         return new Promise(async (resolve, reject) => {
+            let args = [
+                '--ignore-certificate-errors',
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                //   '--disable-translate',
+                //  '--disable-extensions',
+                //   '--disable-sync'
+                '--disable-extensions-except='+this.path+'',
+                '--load-extension='+this.path+''
+            ]
+            if(process.env.PROXY_SERVER)
+                args.push(`--proxy-server=${process.env.PROXY_SERVER}`)
             const browser = await puppeteer.launch({
                 ignoreHTTPSErrors:true,
-                args:[
-                    '--proxy-server='+process.env.PROXY_SERVER,
-                    '--ignore-certificate-errors',
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    //   '--disable-translate',
-                    //  '--disable-extensions',
-                    //   '--disable-sync'
-                    '--disable-extensions-except='+this.path+'',
-                    '--load-extension='+this.path+''
-                ],
+                args:args,
                 headless:false,
             })
                 .catch(err => {
@@ -43,13 +45,20 @@ class Chrome{
                 });
             this.Browser = browser;
             this.Page = await browser.newPage().catch(err => reject(err));
-            if(process.env.PROXY_TYPE === 'crawlera'){
-                await this.Page.setExtraHTTPHeaders({
-                    'Proxy-Authorization': 'Basic ' + Buffer.from(process.env.PROXY_KEY).toString('base64')
-                });
-            }
-            else{
-                await this.Page.authenticate({ username: process.env.PROXY_USERNAME, password: process.env.PROXY_PASSWORD });
+
+            if(process.env.PROXY_SERVER){
+                switch (process.env.PROXY_AUTH) {
+                    case 'crawlera':
+                        await this.Page.setExtraHTTPHeaders({
+                            'Proxy-Authorization': 'Basic ' + Buffer.from(process.env.PROXY_KEY).toString('base64')
+                        });
+                        break;
+                    case 'basic':
+                        await this.Page.authenticate({ username: process.env.PROXY_USERNAME, password: process.env.PROXY_PASSWORD });
+                        break;
+                    default:
+                        break;
+                }
             }
 
             await this.Page.setViewport({width: this.width, height: this.height}).catch(err => reject(err));
