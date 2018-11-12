@@ -9,6 +9,8 @@ class Chrome{
         this.waitUntil = 'waitUntil' in options ? options.waitUntil : 'networkidle0';
         this.UserAgent = options.UserAgent;
         this.path = __dirname+'/../../Utils/AntiCaptcha/';
+        this.headless = process.env.HEADLESS === 'true' ? true : false
+
 
     }
 
@@ -37,7 +39,7 @@ class Chrome{
             const browser = await puppeteer.launch({
                 ignoreHTTPSErrors:true,
                 args:args,
-                headless:false,
+                headless:this.headless,
             })
                 .catch(err => {
                     console.error(err);

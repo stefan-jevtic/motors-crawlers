@@ -46,7 +46,7 @@ class DetailWorker {
                 })
                 .catch(async err => {
                     global.loger.error(err)
-                    global.AlertSvc(`${this.spider} detail job error ${job.id}: ${e.message}`)
+                    global.AlertSvc(`${this.spider} detail job error ${job.id}: ${err.message}`)
                     if(job.num_failures < 5){
                         await this.push(job.id, {
                             num_failures: job.num_failures+1
