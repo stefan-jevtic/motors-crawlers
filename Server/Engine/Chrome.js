@@ -8,7 +8,7 @@ class Chrome{
         this.timeout = 'timeout' in options ? options.timeout : 30000
         this.waitUntil = 'waitUntil' in options ? options.waitUntil : 'networkidle0'
         this.UserAgent = options.UserAgent;
-        this.path = '';  // PATH TO CHROMIUM EXTENSION FOR ANTICAPTCHA
+        this.path = __dirname+'/../../Utils/AntiCaptcha/';
 
     }
 

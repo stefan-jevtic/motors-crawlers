@@ -4,9 +4,9 @@ const sequelize = require('../Models/index').sequelize;
 class DetailWorker {
 
     constructor(spider, engine){
-        this.queueConcurrency = 1; //parseInt(process.env.DETAIL_MAX_CONCURRENCY);
-        this.queueInterval = 5000; //parseInt(process.env.DETAIL_INTERVAL);
-        this.queueLimit = 1; // parseInt(process.env.MAX_COMPETITOR_QUEUE)
+        this.queueConcurrency = parseInt(process.env.DETAIL_MAX_CONCURRENCY);
+        this.queueInterval = parseInt(process.env.DETAIL_INTERVAL);
+        this.queueLimit = parseInt(process.env.MAX_COMPETITOR_QUEUE);
         const Detail = require(`../Scrapers/${spider}/detail`);
         this.test = new Detail(engine);
         this.spider = spider;
