@@ -17,7 +17,7 @@ class ListingWorker {
     }
 
     pop(num){
-        const q = `SELECT * FROM listing_queue WHERE spider=:spider AND (finished_at IS NULL OR finished_at<(NOW() - INTERVAL 3 DAY)) AND num_failures < 5 LIMIT 3`
+        const q = `SELECT * FROM listing_queue WHERE spider=:spider AND (finished_at IS NULL OR finished_at<(NOW() - INTERVAL 3 DAY)) AND num_failures < 5 LIMIT 3`;
         return sequelize.query(q, {
             replacements: { spider: this.spider},
             type: sequelize.QueryTypes.SELECT

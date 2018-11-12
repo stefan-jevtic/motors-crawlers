@@ -28,6 +28,7 @@ class Listing extends mobilede {
                     return resolve()
                 }
                 let url = links[i];
+                console.log(url);
                 const response = await engine.get(url, {})
                     .catch(err => {
                         engine.close()
@@ -51,8 +52,8 @@ class Listing extends mobilede {
                     }
                     let pagination = $('ul.pagination li');
                     for(let p = 0; p < pagination.length; p++){
-                        console.log($(pagination[p]).find('span').attr('data-href'));
-                        if(links.indexOf($(pagination[p]).attr('data-href')) === -1 && !$(pagination[p]).hasClass('padding-first-button') && $(pagination[p]).find('span').attr('data-href'))
+                       // console.log($(pagination[p]).find('span').attr('data-href'));
+                        if(links.indexOf($(pagination[p]).find('span').attr('data-href')) === -1 && !$(pagination[p]).hasClass('padding-first-button') && $(pagination[p]).find('span').attr('data-href'))
                             links.push($(pagination[p]).find('span').attr('data-href'))
                     }
                     if($('title').text().indexOf('Are you a human')>-1){
@@ -118,9 +119,10 @@ class Listing extends mobilede {
         }
     }
 
-    async SaveInfo(info,sequence_id,name) {
+     SaveInfo(info,sequence_id,name) {
+       // console.log(info);
         let that=this;
-        await that.DB.insertListing(info,sequence_id,name);
+        that.DB.insertListing(info,sequence_id,name);
     }
 }
 
