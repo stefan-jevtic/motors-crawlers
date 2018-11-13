@@ -40,7 +40,7 @@ class Listing extends mobilede {
                     let usage = url.split('usage=')[1].split('&')[0];
                     let country_code = url.split('cn=')[1].split('&')[0];
                     let brand_code = url.split('makeModelVariant1.makeId=')[1].split('&')[0];
-                    let brand = await that.DB.getBrand(that.source_id,brand_code);
+                    let brand = await that.DB.getBrand(that.source_id,12100);
                     let url_obj = {
                         'condition': usage,
                         'country_code': country_code,
@@ -50,18 +50,24 @@ class Listing extends mobilede {
                         'source_id':that.source_id,
                         'origin_url':url
                     }
-                    let pagination = $('ul.pagination li');
-                    for(let p = 0; p < pagination.length; p++){
-                       // console.log($(pagination[p]).find('span').attr('data-href'));
-                        if(links.indexOf($(pagination[p]).find('span').attr('data-href')) === -1 && !$(pagination[p]).hasClass('padding-first-button') && $(pagination[p]).find('span').attr('data-href'))
-                            links.push($(pagination[p]).find('span').attr('data-href'))
+                    let pagination = $(".pagination li span").not(":has(i)");
+
+                    for(let p = 1; p < pagination.length; p++){
+                        // console.log($(pagination[p]).find('span').attr('data-href'));
+                        if(links.indexOf($(pagination[p]).attr('data-href')) === -1)
+                            links.push($(pagination[p]).attr('data-href'))
                     }
                     if($('title').text().indexOf('Are you a human')>-1){
                         await engine.request.Page.waitForSelector('div.antigate_solver.recaptcha.solved',{'timeout':200000});
                         await engine.request.Page.click('.btn.btn--orange.u-full-width');
-                        await engine.request.Page.waitForNavigation();
+                        await engine.request.Page.waitForNavigation({'timeout':100000});
                         let Body  = await engine.request.Page.content();
                         $ = that.cheerio.load(Body);
+                        pagination = $(".pagination li span").not(":has(i)")
+                        for(let p = 1; p < pagination.length; p++){
+                            if(links.indexOf($(pagination[p]).attr('data-href')) === -1)
+                                links.push($(pagination[p]).attr('data-href'))
+                        }
                         that.ParsePage($, url_obj, function () {
                             return loop(++i);
                         })

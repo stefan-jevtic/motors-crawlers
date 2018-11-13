@@ -5,7 +5,7 @@ class Chrome{
     constructor(options){
         this.width = 'width' in options ? options.width : 1366
         this.height = 'heigth' in options ? options.heigth : 766
-        this.timeout = 'timeout' in options ? options.timeout : 30000
+        this.timeout = 'timeout' in options ? options.timeout : 50000
         this.waitUntil = 'waitUntil' in options ? options.waitUntil : 'networkidle0';
         this.UserAgent = options.UserAgent;
         this.path = __dirname+'/../../Utils/AntiCaptcha/';
