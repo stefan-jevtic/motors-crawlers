@@ -12,7 +12,7 @@ class ListingWorker {
         this.spider = spider;
         this.dq = require('../Models/index').listing_queue;
         Queue.configure(Promise);
-        this.queue = new Queue(this.queueConcurrency, this.queueLimit)
+        this.queue = new Queue(this.queueConcurrency, this.queueLimit);
         this.counter = 0
     }
 

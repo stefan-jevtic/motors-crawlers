@@ -31,39 +31,50 @@ class Database {
     }
 
 
-    insertListing(item,run_sequnece_id,spider_name){
+    insertListing(item,spider_name,origin_url){
+        this.archive_offers(origin_url);
 
-        DB.sequelize.query('INSERT IGNORE INTO offers(scope, country_code, brand_id, brand, cond, currency, price_net, price_gross, vat, offer_id, source_id, url, run_sequence_id, origin_url, created_at, updated_at)' +
-            'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-            {
-                replacements: [
-                    item['scope'],
-                    item['country_code'],
-                    item['brand_id'],
-                    item['brand'],
-                    item['condition'],
-                    item['currency'],
-                    item['price_net'],
-                    item['price_gross'],
-                    item['vat'],
-                    item['offer_id'],
-                    item['source_id'],
-                    item['url'],
-                    item['origin_url'],
-                    run_sequnece_id,
-                    new Date(),
-                    new Date()
-                ],
-                type: DB.sequelize.QueryTypes.INSERT
-            }).then(result => {  })
+        this.delete_offers(origin_url);
 
-        this.enqueue_detail_urls(item['url'],'mobile-de');
+        let keys=Object.keys(item);
 
-        this.insert_offer_mappings(item['origin_url'],item['source_id'],item['offer_id'],item['brand_id'],item['brand']);
+        for(let i=0;i<item.length;i++){
+            let key = keys[i];
 
-        this.delete_offers(item['origin_url']);
+            console.log(item[i]);
+            DB.sequelize.query('INSERT IGNORE INTO offers(scope, country_code, brand_id, brand, cond, currency, price_net, price_gross, vat, offer_id, source_id, url, run_sequence_id, origin_url, created_at, updated_at)' +
+                'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                {
+                    replacements: [
+                        item[key]['scope'],
+                        item[key]['country_code'],
+                        item[key]['brand_id'],
+                        item[key]['brand'],
+                        item[key]['condition'],
+                        item[key]['currency'],
+                        item[key]['price_net'],
+                        item[key]['price_gross'],
+                        item[key]['vat'],
+                        item[key]['offer_id'],
+                        item[key]['source_id'],
+                        item[key]['url'],
+                        item[key]['run_sequence_id']+1,
+                        item[key]['origin_url'],
+                        new Date(),
+                        new Date()
+                    ],
+                    type: DB.sequelize.QueryTypes.INSERT
+                }).then(result => {
+                console.log('insertovao')
+            })
 
-        this.archive_offers(item['origin_url']);
+            this.insert_offer_mappings(item[key]['origin_url'],item[key]['source_id'],item[key]['offer_id'],item[key]['brand_id'],item[key]['brand']);
+
+            this.enqueue_detail_urls(item[key]['url'],'mobile-de');
+        }
+
+
+
     }
 
 

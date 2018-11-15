@@ -23,40 +23,41 @@ class Detail extends mobilede {
                     console.error(err, 'Failed to initialize search engine. Aborting.');
                     return reject(err)
                 });
-            const response = await engine.get(url, {})
+            engine.get(url, {})
+                .then(async response => {
+                    try {
+                        let $ = this.cheerio.load(response.html);
+                        if($('title').text().indexOf('Are you a human')>-1){
+                            await engine.request.Page.waitForSelector('div.antigate_solver.recaptcha.solved',{'timeout':200000});
+                            await engine.request.Page.click('.btn.btn--orange.u-full-width');
+                            await engine.request.Page.waitForNavigation();
+                            let Body  = await engine.request.Page.content();
+                            let $2 = this.cheerio.load(Body);
+                            this.ParsePage($2, url, (err, status) => {
+                                engine.close();
+                                if(err)
+                                    return reject(err);
+                                return resolve(status)
+                            })
+                        }
+                        else{
+                            this.ParsePage($, url, (err, status) => {
+                                engine.close();
+                                if(err)
+                                    return reject(err);
+                                return resolve(status)
+                            })
+                        }
+                    }
+                    catch (e) {
+                        engine.close()
+                        return reject(e)
+                    }
+                })
                 .catch(err => {
                     engine.close()
                     return reject(err)
                 })
-            try {
-                let $ = this.cheerio.load(response.html);
-                if($('title').text().indexOf('Are you a human')>-1){
-                    await engine.request.Page.waitForSelector('div.antigate_solver.recaptcha.solved',{'timeout':200000});
-                    await engine.request.Page.click('.btn.btn--orange.u-full-width');
-                    await engine.request.Page.waitForNavigation();
-                    let Body  = await engine.request.Page.content();
-                    let $2 = this.cheerio.load(Body);
-                    this.ParsePage($2, url, (err, status) => {
-                        engine.close();
-                        if(err)
-                            return reject(err);
-                        return resolve(status)
-                    })
-                }
-                else{
-                    this.ParsePage($, url, (err, status) => {
-                        engine.close();
-                        if(err)
-                            return reject(err);
-                        return resolve(status)
-                    })
-                }
-            }
-            catch (e) {
-                engine.close()
-                return reject(e)
-            }
-
         })
     }
 
@@ -83,11 +84,6 @@ class Detail extends mobilede {
             for(let i=0;i<element_1.length;i++){
                 attribute_label = $(element_1[i]).find('div').eq(0).find('strong').text().trim();
                 attribute_value = $(element_1[i]).find('div').eq(1).text().trim();
-
-                console.log(attribute_label,attribute_value)
-
-
-
                 if(!attribute_value)
                     continue;
                 attribute_def = that.AttributeDeffinitons(attribute_mappings,attribute_label);

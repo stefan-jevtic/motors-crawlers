@@ -17,7 +17,7 @@ class DetailWorker {
     }
 
     pop(num){
-        const q = `SELECT * FROM detail_queue WHERE spider=:spider AND (finished_at IS NULL OR finished_at<(NOW() - INTERVAL 3 DAY)) AND num_failures < 5 LIMIT 3`
+        const q = `SELECT * FROM detail_queue WHERE spider=:spider AND (finished_at IS NULL OR finished_at<(NOW() - INTERVAL 3 DAY)) AND num_failures < 5 order by id asc LIMIT 3`
         return sequelize.query(q, {
             replacements: { spider: this.spider},
             type: sequelize.QueryTypes.SELECT

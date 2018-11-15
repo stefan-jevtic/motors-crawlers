@@ -3,15 +3,13 @@ const puppeteer = require('puppeteer');
 class Chrome{
 
     constructor(options){
-        this.width = 'width' in options ? options.width : 1366
-        this.height = 'heigth' in options ? options.heigth : 766
-        this.timeout = 'timeout' in options ? options.timeout : 50000
-        this.waitUntil = 'waitUntil' in options ? options.waitUntil : 'networkidle0';
+        this.width = 'width' in options ? options.width : 1366;
+        this.height = 'heigth' in options ? options.heigth : 766;
+        this.timeout = 'timeout' in options ? options.timeout : 30000;
+        this.waitUntil = 'waitUntil' in options ? options.waitUntil : 'load';
         this.UserAgent = options.UserAgent;
         this.path = __dirname+'/../../Utils/AntiCaptcha/';
         this.headless = process.env.HEADLESS === 'true' ? true : false
-
-
     }
 
     init(){
@@ -90,8 +88,7 @@ class Chrome{
 
         (async function loop(i) {
 
-            if(i > 10){
-                await that.CloseBrowser();
+            if(i > 7){
                 return callback(new Error('Engine failed 10 times to get response!'), null);
             }
 
@@ -148,17 +145,13 @@ class Chrome{
                 }else if(err.stack.indexOf('Error: net::ERR_EMPTY_RESPONSE')>-1){
                     err_msg='Error: net::ERR_EMPTY_RESPONSE';
                     console.log(err_msg,'Browser is in sleep mode!!!!')
-                    setTimeout(function(){
-                        return loop(++i);
-                    },20000);
-                    return false;
+                    await that.delay(10000)
+                    return loop(++i)
                 }else if(err.stack.indexOf('Error: net::ERR_CONNECTION_CLOSED')>-1){
                     err_msg='Error: net::ERR_CONNECTION_CLOSED';
                     console.log(err_msg,'Browser is in sleep mode!!!!')
-                    setTimeout(function(){
-                        return loop(++i);
-                    },20000);
-                    return false;
+                    await that.delay(10000)
+                    return loop(++i)
                 }else if(err.stack.indexOf('Skip')>-1){
                     err_msg='Skip';
                     return loop(100);
@@ -179,6 +172,10 @@ class Chrome{
                 return loop(++i);
             }
         }(0));
+    }
+
+    delay(secs){
+        return new Promise((resolve, reject) => setTimeout(resolve, secs))
     }
 
     end(){

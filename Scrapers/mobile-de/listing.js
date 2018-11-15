@@ -14,7 +14,7 @@ class Listing extends mobilede {
     Run(job) {
         return new Promise(async (resolve, reject) => {
             let that = this, url;
-            let links=[];
+            let links = [];
             links.push(job.start_url);
             const engine = await Engine.create(this.type, this.EngineOptions)
                 .catch(err => {
@@ -28,69 +28,77 @@ class Listing extends mobilede {
                     return resolve()
                 }
                 let url = links[i];
-                console.log(url);
-                const response = await engine.get(url, {})
+                engine.get(url, {})
+                    .then(async response => {
+                        try {
+                            let $ = that.cheerio.load(response.html);
+                            let scope = url.split('scopeId=')[1].split('&')[0];
+                            let usage = url.split('usage=')[1].split('&')[0];
+                            let country_code = url.split('cn=')[1].split('&')[0];
+                            let brand_code = url.split('makeModelVariant1.makeId=')[1].split('&')[0];
+                            let brand = await that.DB.getBrand(that.source_id,12100);
+                            let run_sequence_id = job.run_sequence_id;
+                            let url_obj = {
+                                'condition': usage,
+                                'country_code': country_code,
+                                'brand': brand_code,
+                                'brand_id': brand,
+                                'scope': scope,
+                                'source_id':that.source_id,
+                                'origin_url':url,
+                                'run_sequence_id':run_sequence_id
+                            }
+                            let pagination = $(".pagination li span").not(":has(i)");
+                            for(let p = 1; p < pagination.length; p++){
+                                // console.log($(pagination[p]).find('span').attr('data-href'));
+                                if(links.indexOf($(pagination[p]).attr('data-href')) === -1)
+                                    links.push($(pagination[p]).attr('data-href'))
+                            }
+                            if($('title').text().indexOf('Are you a human')>-1){
+                                await engine.request.Page.waitForSelector('div.antigate_solver.recaptcha.solved',{'timeout':200000});
+                                await engine.request.Page.click('.btn.btn--orange.u-full-width');
+                                await engine.request.Page.waitForNavigation();
+                                let Body  = await engine.request.Page.content();
+                                $ = that.cheerio.load(Body);
+                                pagination = $(".pagination li span").not(":has(i)");
+                                for(let p = 1; p < pagination.length; p++){
+                                    if(links.indexOf($(pagination[p]).attr('data-href')) === -1)
+                                        links.push($(pagination[p]).attr('data-href'))
+                                }
+                                that.ParsePage($, url_obj,url, function () {
+                                    return loop(++i);
+                                })
+                            }else{
+                                that.ParsePage($, url_obj,url, function () {
+                                    return loop(++i);
+                                })
+                            }
+                        }
+                        catch (e) {
+                            console.error(e)
+                            return loop(++i)
+                        }
+                    })
                     .catch(err => {
                         engine.close()
                         return reject(err)
                     })
-                try {
-                    let $ = that.cheerio.load(response.html);
-                    let scope = url.split('scopeId=')[1].split('&')[0];
-                    let usage = url.split('usage=')[1].split('&')[0];
-                    let country_code = url.split('cn=')[1].split('&')[0];
-                    let brand_code = url.split('makeModelVariant1.makeId=')[1].split('&')[0];
-                    let brand = await that.DB.getBrand(that.source_id,12100);
-                    let url_obj = {
-                        'condition': usage,
-                        'country_code': country_code,
-                        'brand_': brand_code,
-                        'brand_id': brand,
-                        'scope': scope,
-                        'source_id':that.source_id,
-                        'origin_url':url
-                    }
-                    let pagination = $(".pagination li span").not(":has(i)");
-
-                    for(let p = 1; p < pagination.length; p++){
-                        // console.log($(pagination[p]).find('span').attr('data-href'));
-                        if(links.indexOf($(pagination[p]).attr('data-href')) === -1)
-                            links.push($(pagination[p]).attr('data-href'))
-                    }
-                    if($('title').text().indexOf('Are you a human')>-1){
-                        await engine.request.Page.waitForSelector('div.antigate_solver.recaptcha.solved',{'timeout':200000});
-                        await engine.request.Page.click('.btn.btn--orange.u-full-width');
-                        await engine.request.Page.waitForNavigation({'timeout':100000});
-                        let Body  = await engine.request.Page.content();
-                        $ = that.cheerio.load(Body);
-                        pagination = $(".pagination li span").not(":has(i)")
-                        for(let p = 1; p < pagination.length; p++){
-                            if(links.indexOf($(pagination[p]).attr('data-href')) === -1)
-                                links.push($(pagination[p]).attr('data-href'))
-                        }
-                        that.ParsePage($, url_obj, function () {
-                            return loop(++i);
-                        })
-                    }else{
-                        that.ParsePage($, url_obj, function () {
-                            return loop(++i);
-                        })
-                    }
-                }
-                catch (e) {
-                    console.error(e)
-                    return loop(++i)
-                }
-
             })(0)
         })
     }
 
-    ParsePage($,url_obj,callback) {
-        let offer_id,url,price_net,price_gross,hasOfferPrice,vat,that=this;
+    ParsePage($,url_obj,origin_url,callback) {
+        let offer_id,url,price_net,price_gross,hasOfferPrice,vat,that=this,items=[];
         let element = $('a.result-item');
+        let length =element.length;
         try{
-            for(let i =0;i<element.length;i++){
+
+            (function loop(i) {
+                let pom ={};
+                if(element[i] === undefined){
+                    that.SaveInfo(items,that.name,origin_url);
+                    return callback('done')
+                }
                 offer_id = $(element[i]).attr('data-ad-id');
                 url = 'https://suchen.mobile.de/fahrzeuge/details.html?id='+offer_id+'&lang=en';
                 hasOfferPrice = $(element[i]).find('.price-block span.h2.u-text-line-through').text();
@@ -111,13 +119,17 @@ class Listing extends mobilede {
                 }
                 url_obj['offer_id']= offer_id;
                 url_obj['price_net']= price_net;
-                url_obj['price_gross']= offer_id;
+                url_obj['price_gross']= price_gross;
                 url_obj['vat']= vat;
                 url_obj['currency']= 'EUR';
                 url_obj['url'] = url;
-                that.SaveInfo(url_obj,1,that.name);
-            }
-            return callback('done')
+                pom = Object.assign({}, url_obj)
+                items.push(pom);
+
+               return loop(++i);
+
+            })(0);
+
         }
         catch(e){
             console.log(e);
@@ -125,10 +137,10 @@ class Listing extends mobilede {
         }
     }
 
-     SaveInfo(info,sequence_id,name) {
-       // console.log(info);
+    SaveInfo(info,name,origin_url) {
         let that=this;
-        that.DB.insertListing(info,sequence_id,name);
+        //console.log(info);
+        that.DB.insertListing(info,name,origin_url);
     }
 }
 
