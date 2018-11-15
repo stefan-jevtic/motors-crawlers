@@ -32,6 +32,7 @@ class Database {
 
 
     insertListing(item,spider_name,origin_url){
+
         this.archive_offers(origin_url);
 
         this.delete_offers(origin_url);
@@ -40,8 +41,6 @@ class Database {
 
         for(let i=0;i<item.length;i++){
             let key = keys[i];
-
-            console.log(item[i]);
             DB.sequelize.query('INSERT IGNORE INTO offers(scope, country_code, brand_id, brand, cond, currency, price_net, price_gross, vat, offer_id, source_id, url, run_sequence_id, origin_url, created_at, updated_at)' +
                 'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                 {
@@ -87,7 +86,7 @@ class Database {
                         lang
                     ]
                 })
-                .then((results, meta) => {
+                .spread((results, meta) => {
                     resolve(results);
                 })
         })
@@ -182,40 +181,56 @@ class Database {
     }
 
 
-    insertDetail(item,reseller_item){
-        let that=this;
-        that.insert_attributes(item['attribute_key'],
-            item['value'],
-            item['source_id'],
-            item['offer_id'],
-            item['is_option'],
-            item['checked']);
+    async insertDetail(item,reseller_item){
 
-        that.update_offer_dealer(reseller_item['reseller_id'],item['offer_id'],item['source_id']);
+        let keys=Object.keys(item),that=this,reseller,reseller_id,offer_id,source_id;
 
 
-        if(item['title']){
-            that.update_offer_ttile(item['title'],item['offer_id'],item['source_id'])
+        for(let i = 0; i<item.length;i++){
+            let key = keys[i];
+            if(item[key]['attribute_key']=='description' && item[key['value']]){
+                offer_id = item[key]['offer_id'];
+                source_id = item[key]['source_id'];
+                that.update_offer_description(item[key]['value'],item[key]['offer_id'],item[key]['source_id'])
+            }
+            else if(item[key]['attribute_key']=='title' && item[key['value']]){
+                offer_id = item[key]['offer_id'];
+                source_id = item[key]['source_id'];
+                that.update_offer_ttile(item[key]['value'],item[key]['offer_id'],item[key]['source_id'])
+            }
+            else if(item[key]['attribute_key']=='photo_url' && item[key['value']]){
+                offer_id = item[key]['offer_id'];
+                source_id = item[key]['source_id'];
+                that.update_offer_photo_url(item[key]['value'],item[key]['offer_id'],item[key]['source_id'])
+            }else {
+                offer_id = item[key]['offer_id'];
+                source_id = item[key]['source_id'];
+                that.insert_attributes(item[key]['attribute_key'],item[key]['value'],item[key]['source_id'],item[key]['offer_id'],
+                    item[key]['is_option'],item[key]['checked'])
+
+            }
+
+
         }
-        if(item['photo_url']){
-            that.update_offer_photo_url(item['photo_url'],item['offer_id'],item['source_id'])
-        }
-        if(item['desc']){
-            that.update_offer_description(item['desc'],item['offer_id'],item['source_id'])
-        }
 
+        if(reseller_item.length){
 
-
-        let reseller ='',reseller_id='',reseller_data;
-
-        if(reseller_item){
-            reseller = that.get_reseller(reseller_item);
+            reseller = that.get_resseler(reseller_item[0]);
             if(reseller){
                 reseller_id = reseller['id'];
-            }else{
-                console.log('Geo api needed')
+            }else {
+                let reseler_data = await that.enrich_reseller(reseller_item[0])
+                reseller_id = await that.create_reseller(reseler_data);
+
             }
+
         }
+
+
+       that.update_offer_dealer(reseller_id,offer_id,source_id);
+
+
+
 
     }
 
@@ -301,6 +316,91 @@ class Database {
                     resolve(resutls);
                 })
         })
+    }
+
+
+    get_resseler(reseller){
+        return new Promise((resolve)=>{
+
+            if(reseller['reseller_code']){
+                DB.sequelize.query('SELECT * FROM resellers WHERE source_code= ? AND reseller_code=?',
+                    {
+                        replacements:[
+                            reseller['source_code'],
+                            reseller['reseller_code']
+                        ]
+                    })
+                    .spread((resutls,meta)=>{
+                        resolve(resutls);
+                    })
+            }else{
+                DB.sequelize.query('SELECT * FROM resellers WHERE source_code=? AND name=? AND full_address=?',
+                    {
+                        replacements:[
+                            reseller['source_code'],
+                            reseller['name'],
+                            reseller['full_address']
+                        ]
+                    })
+                    .spread((resutls,meta)=>{
+                        resolve(resutls);
+                    })
+            }
+
+
+        })
+
+
+    }
+
+
+    enrich_reseller(item){
+
+
+    }
+
+    create_reseller(reseller){
+        return new Promise((resolve)=>{
+            DB.sequelize.query('INSERT INTO resellers(name, source_code, reseller_code, country_code, reseller_type,url, logo, votes, rating, phone, full_address, geo_lat, geo_lng, country, street_number, postal_code, locality, route, admin_area_level_1, admin_area_level_2, place_id, geo_bounds_south_lat, geo_bounds_south_lng,geo_bounds_north_lat, geo_bounds_north_lng, created_at, updated_at) ' +
+                'VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                {
+                    replacements:
+                        [   reseller['name'],
+                            reseller['source_code'],
+                            reseller['reseller_code'],
+                            reseller['country_code'],
+                            reseller['reseller_type'],
+                            reseller['url'],
+                            reseller['logo'],
+                            reseller['votes'],
+                            reseller['rating'],
+                            reseller['phone'],
+                            reseller['full_address'],
+                            reseller['geo_lat'],
+                            reseller['geo_lng'],
+                            reseller['country'],
+                            reseller['street_number'],
+                            reseller['postal_code'],
+                            reseller['locality'],
+                            reseller['route'],
+                            reseller['admin_area_level_1'],
+                            reseller['admin_area_level_2'],
+                            reseller['place_id'],
+                            reseller['geo_bounds_south_lat'],
+                            reseller['geo_bounds_south_lng'],
+                            reseller['geo_bounds_north_lat'],
+                            reseller['geo_bounds_north_lng'],
+                            new Date(),
+                            new Date()
+                        ],
+                    type: DB.sequelize.QueryTypes.INSERT
+                })
+                .then(result => {
+                    resolve(result.id)
+                })
+        })
+
+
     }
 
 

@@ -15,8 +15,8 @@ class Detail extends mobilede {
 
     Run(job) {
         return new Promise(async (resolve, reject) => {
-            let url = job.start_url
-            // url = 'https://suchen.mobile.de/fahrzeuge/details.html?id=267983498&cn=PL&damageUnrepaired=NO_DAMAGE_UNREPAIRED&grossPrice=false&isSearchRequest=true&makeModelVariant1.makeId=12100&pageNumber=1&scopeId=STT&usage=USED&fnai=prev&searchId=c7c9c338-af05-9de5-8888-3978b107e7fe';
+            let url = job.start_url;
+            //url = 'https://suchen.mobile.de/fahrzeuge/details.html?id=269018400&cn=PL&damageUnrepaired=NO_DAMAGE_UNREPAIRED&grossPrice=false&isSearchRequest=true&makeModelVariant1.makeId=12100&pageNumber=1&scopeId=STT&usage=USED&fnai=prev&searchId=85fbfaff-5189-5d8e-5642-1c248f17da82';
             console.log(url);
             const engine = await Engine.create(this.type, this.EngineOptions)
                 .catch(err => {
@@ -28,9 +28,12 @@ class Detail extends mobilede {
                     try {
                         let $ = this.cheerio.load(response.html);
                         if($('title').text().indexOf('Are you a human')>-1){
+                            global.loger.warn('CAPTCHA OCCURS!')
+                            global.loger.debug('Solving captcha...')
                             await engine.request.Page.waitForSelector('div.antigate_solver.recaptcha.solved',{'timeout':200000});
                             await engine.request.Page.click('.btn.btn--orange.u-full-width');
-                            await engine.request.Page.waitForNavigation();
+                            await engine.request.Page.waitForNavigation({'timeout':200000});
+                            global.loger.debug('CAPTCHA SOLVED, CONTINUING...')
                             let Body  = await engine.request.Page.content();
                             let $2 = this.cheerio.load(Body);
                             this.ParsePage($2, url, (err, status) => {
@@ -50,19 +53,19 @@ class Detail extends mobilede {
                         }
                     }
                     catch (e) {
-                        engine.close()
+                        engine.close();
                         return reject(e)
                     }
                 })
                 .catch(err => {
-                    engine.close()
+                    engine.close();
                     return reject(err)
                 })
         })
     }
 
     async ParsePage($, url, callback) {
-        let title,phote_url,desc,offer_id,attribute_mappings,attribute_value_mappings,attribute_label,attribute_value,attribute_value_option,attribute_def,that=this,item={},reseller = {};
+        let title,phote_url,desc,offer_id,attribute_mappings,attribute_value_mappings,attribute_label,attribute_value,attribute_value_option,attribute_def,that=this,item={},reseller = {}, pom={},res ={}, items = [], resellers = [];
 
         try{
             offer_id  = url.split('?id=')[1].split('&')[0];
@@ -71,19 +74,40 @@ class Detail extends mobilede {
             attribute_value_mappings = await that.DB.get_attribute_value_mappings(that.source_code,'en');
 
             title = $('h1[id=rbt-ad-title]').text().trim();
+            if(title){
+                item['offer_id'] = offer_id;
+                item['source_id'] = that.source_id;
+                item['attribute_key'] = 'title';
+                item['value'] = title;
+                pom = Object.assign({}, item);
+                items.push(pom);
+            }
+
             phote_url = $('div[id=rbt-gallery-img-0] img').attr('src');
+            if(phote_url){
+                item['offer_id'] = offer_id;
+                item['source_id'] = that.source_id;
+                item['attribute_key'] = 'photo_url';
+                item['value'] = phote_url;
+                pom = Object.assign({}, item);
+                items.push(pom);
+            }
+
             desc = $('div.description').text();
-
-            item['title'] = title;
-            item['photo_url'] = phote_url;
-            item ['desc'] = desc;
-
+            if(desc){
+                item['offer_id'] = offer_id;
+                item['source_id'] = that.source_id;
+                item['attribute_key'] = 'description';
+                item['value'] = desc;
+                pom = Object.assign({}, item);
+                items.push(pom);
+            }
 
             let element_1 = $('div.cBox-body--technical-data div.g-row');
-
             for(let i=0;i<element_1.length;i++){
                 attribute_label = $(element_1[i]).find('div').eq(0).find('strong').text().trim();
                 attribute_value = $(element_1[i]).find('div').eq(1).text().trim();
+
                 if(!attribute_value)
                     continue;
                 attribute_def = that.AttributeDeffinitons(attribute_mappings,attribute_label);
@@ -95,6 +119,9 @@ class Detail extends mobilede {
                     item['value'] = attribute_value;
                     item['is_option'] = 0;
                     item['checked'] = 0;
+                    pom = Object.assign({}, item);
+                    items.push(pom);
+
                 }
                 else if (attribute_def['attribute_key'] === 'ignore'){
                     console.log('ignore attribite '+attribute_label);
@@ -102,19 +129,36 @@ class Detail extends mobilede {
                 else if(attribute_def['attribute_key'] === 'first registration'){
                     item['offer_id'] = offer_id;
                     item['source_id'] = that.source_id;
-                    item['attribute_key'] = 'first_registration'
+                    item['attribute_key'] = 'first_registration';
                     item['value'] = attribute_value;
                     item['is_option'] = 0;
                     item['checked'] = 1;
-                    let first_registration_month, first_registraiton_year = attribute_value.split('/');
+                    pom = Object.assign({}, item);
+                    items.push(pom);
+                    let first_registration_month = attribute_value.split('/')[0];
+                    let first_registraiton_year = attribute_value.split('/')[1];
+
+                    item['attribute_key'] = 'first_registration_year';
+                    item['value'] = first_registraiton_year;
+                    item['is_option'] = 0;
+                    item['checked'] = 1;
+                    pom = Object.assign({}, item);
+                    items.push(pom);
+
+                    item['attribute_key'] = 'first_registration_month';
+                    item['value'] = first_registration_month;
+                    item['is_option'] = 0;
+                    item['checked'] = 1;
+
+                    pom = Object.assign({}, item);
+                    items.push(pom);
 
                 }else {
-
                     item['offer_id'] = offer_id;
                     item['source_id'] = that.source_id;
                     item['attribute_key'] = attribute_def['attribute_key'];
                     if(attribute_def['attribute_type'] === 'select') {
-                        attribute_value_option = self.OptionValue(attribute_value_mappings, attribute_def['attribute_key'], attribute_value);
+                        attribute_value_option = that.OptionValue(attribute_value_mappings, attribute_def['attribute_key'], attribute_value);
                         if (attribute_value_option) {
                             item['value'] = attribute_value_option;
                             item['is_option'] = 1;
@@ -134,9 +178,10 @@ class Detail extends mobilede {
                         item['checked'] = 1
 
                     }
-                }
 
-                console.log(attribute_label,attribute_value)
+                    pom = Object.assign({}, item);
+                    items.push(pom);
+                }
 
             }
 
@@ -178,9 +223,11 @@ class Detail extends mobilede {
                 if((!reseller['name'] || !reseller['full_address']) && !reseller['reseller_code'])
                     console.log('Cannot identify reseller at this url:'+url);
                 else {
-                    that.SaveInfo(item,reseller);
+                    res = Object.assign({},reseller);
+                    resellers.push(res);
                 }
             }
+            that.SaveInfo(items,resellers);
             return callback(null, 'done')
         }
         catch(e){
@@ -195,11 +242,10 @@ class Detail extends mobilede {
         that.DB.insertDetail(item,reseller);
     }
 
-
     AttributeDeffinitons(attribute_mappings,attribute_label){
         for(let i=0;i<attribute_mappings.length;i++){
             let attribute_pattern_utf8 = attribute_mappings[i]['attribute_pattern'].toLowerCase();
-            let attribute_label_uf8 = attribute_label.lower();
+            let attribute_label_uf8 = attribute_label.toLowerCase();
             if(attribute_pattern_utf8 == attribute_label_uf8)
                 return attribute_mappings[i]
         }
@@ -215,7 +261,6 @@ class Detail extends mobilede {
             }
         }
     }
-
 
     PostProcessing(attribute_value, attribute_key){
         let att;

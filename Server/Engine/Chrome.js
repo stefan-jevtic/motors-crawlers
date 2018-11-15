@@ -61,6 +61,16 @@ class Chrome{
                 }
             }
 
+            if(process.env.INTERCEPT_REQUEST === 'true'){
+                await this.Page.setRequestInterception(true)
+                this.Page.on('request', req => {
+                    if (['image', 'stylesheet', 'font'].indexOf(req.resourceType()) !== -1)
+                        req.abort();
+                    else
+                        req.continue();
+                })
+            }
+
             await this.Page.setViewport({width: this.width, height: this.height}).catch(err => reject(err));
             await this.Page.setUserAgent(this.UserAgent).catch(err => reject(err));
             resolve(this.Page);
@@ -88,8 +98,8 @@ class Chrome{
 
         (async function loop(i) {
 
-            if(i > 7){
-                return callback(new Error('Engine failed 10 times to get response!'), null);
+            if(i > parseInt(process.env.REPEAT_NETWORK_ERR)){
+                return callback(new Error(`Engine failed ${process.env.REPEAT_NETWORK_ERR} times to get response!`), null);
             }
 
             try{

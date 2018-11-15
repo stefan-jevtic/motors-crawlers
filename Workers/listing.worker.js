@@ -12,16 +12,25 @@ class ListingWorker {
         this.spider = spider;
         this.dq = require('../Models/index').listing_queue;
         Queue.configure(Promise);
-        this.queue = new Queue(this.queueConcurrency, this.queueLimit);
-        this.counter = 0
+        this.queue = new Queue(this.queueConcurrency, this.queueLimit)
     }
 
-    pop(num){
-        const q = `SELECT * FROM listing_queue WHERE spider=:spider AND (finished_at IS NULL OR finished_at<(NOW() - INTERVAL 3 DAY)) AND num_failures < 5 LIMIT 3`;
-        return sequelize.query(q, {
+    async pop(num){
+        const q = `SELECT * FROM listing_queue WHERE spider=:spider AND ((status='READY' AND num_failures<5 AND (finished_at IS NULL OR finished_at<(NOW() - INTERVAL 3 DAY))) OR (status='RESERVED' AND reserved_at<(NOW() - INTERVAL 15 MINUTE) AND num_failures<5)) LIMIT 1`
+        const job = await sequelize.query(q, {
             replacements: { spider: this.spider},
             type: sequelize.QueryTypes.SELECT
         })
+
+        if(job.length){
+            this.push(job[0].id, {
+                reserved_at: new Date(),
+                status: 'RESERVED'
+            })
+        }
+        else
+            global.loger.info('No more jobs to do. Please wait until all jobs finish.')
+        return job
     }
 
     push(jobId, data){
@@ -36,20 +45,23 @@ class ListingWorker {
         return new Promise((resolve, reject) => {
             this.test.Run(job)
                 .then(async () => {
-                 await this.push(job.id, {
-                     finished_at: new Date(),
-                     run_sequence_id: job.run_sequence_id+1
-                 })
+                    await this.push(job.id, {
+                        finished_at: new Date(),
+                        num_failures: 0,
+                        status: 'READY',
+                        run_sequence_id: job.run_sequence_id+1
+                    })
 
-                 global.loger.info(`${this.spider} listing job finished ${job.id}`)
-                 global.AlertSvc(`${this.spider} listing job finished ${job.id}`)
-                 resolve()
+                    global.loger.info(`${this.spider} listing job finished ${job.id}`)
+                    global.AlertSvc(`${this.spider} listing job finished ${job.id}`)
+                    resolve()
                 })
                 .catch(async err => {
                     global.loger.error(err)
                     global.AlertSvc(`${this.spider} listing job error ${job.id}: ${err.message}`)
                     if(job.num_failures < 5){
                         await this.push(job.id, {
+                            status: 'READY',
                             num_failures: job.num_failures+1
                         })
                         reject(err)
@@ -58,6 +70,7 @@ class ListingWorker {
                         global.loger.warn(`${this.spider} listing job: ${job.id} skipped for too many failures`)
                         global.AlertSvc(`${this.spider} listing job: ${job.id} skipped for too many failures`)
                         await this.push(job.id, {
+                            status: 'READY',
                             num_failures: job.num_failures+1
                         })
                         reject(err)
@@ -67,13 +80,6 @@ class ListingWorker {
     }
 
     async crawl(){
-        /**
-         * todo: Uncomment code below if you want to test for 2 * x records
-         * */
-        // if(++this.counter > 2){
-        //     console.log('Finished');
-        //     return false;
-        // }
         global.loger.info(`================> Getting new set of jobs <================`)
         const jobs = await this.pop(0), that = this;
         if(jobs.length === 0){
