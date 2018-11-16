@@ -10,6 +10,7 @@ class Chrome{
         this.UserAgent = options.UserAgent;
         this.path = __dirname+'/../../Utils/AntiCaptcha/';
         this.headless = process.env.HEADLESS === 'true' ? true : false
+        this.session = Math.random().toString(36).substring(2);
     }
 
     init(){
@@ -55,8 +56,14 @@ class Chrome{
                         break;
                     case 'basic':
                         await this.Page.authenticate({ username: process.env.PROXY_USERNAME, password: process.env.PROXY_PASSWORD });
+                        await this.Page.setExtraHTTPHeaders({
+                            'x-lpm-session': this.session
+                        });
                         break;
                     default:
+                        await this.Page.setExtraHTTPHeaders({
+                            'x-lpm-session': this.session
+                        });
                         break;
                 }
             }

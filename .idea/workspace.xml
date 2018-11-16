@@ -2,13 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2ed2c19b-8667-4531-bd49-7984d985f687" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Scrapers/mobile-de/detail.js" beforeDir="false" afterPath="$PROJECT_DIR$/Scrapers/mobile-de/detail.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Scrapers/mobile-de/listing.js" beforeDir="false" afterPath="$PROJECT_DIR$/Scrapers/mobile-de/listing.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/DB/DB.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/DB/DB.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/Engine/Chrome.js" beforeDir="false" afterPath="$PROJECT_DIR$/Server/Engine/Chrome.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Workers/detail.worker.js" beforeDir="false" afterPath="$PROJECT_DIR$/Workers/detail.worker.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Workers/listing.worker.js" beforeDir="false" afterPath="$PROJECT_DIR$/Workers/listing.worker.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -23,13 +18,14 @@
     <session id="148393641">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="13" />
+          <entry key="project.closed" value="15" />
           <entry key="project.open.time.1" value="9" />
+          <entry key="project.open.time.10" value="1" />
           <entry key="project.open.time.2" value="1" />
           <entry key="project.open.time.6" value="1" />
           <entry key="project.open.time.7" value="2" />
-          <entry key="project.open.time.8" value="1" />
-          <entry key="project.opened" value="14" />
+          <entry key="project.open.time.8" value="2" />
+          <entry key="project.opened" value="16" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -47,12 +43,12 @@
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="env" value="80" />
-          <entry key="js" value="4139" />
+          <entry key="js" value="4172" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="JavaScript" value="4139" />
+          <entry key="JavaScript" value="4172" />
           <entry key="PLAIN_TEXT" value="80" />
         </counts>
       </usages-collector>
@@ -63,8 +59,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Server/DB/DB.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="86">
-              <caret line="351" lean-forward="true" selection-start-line="351" selection-end-line="351" />
+            <state relative-caret-position="4140">
+              <caret line="276" column="4" selection-start-line="276" selection-start-column="4" selection-end-line="276" selection-end-column="4" />
             </state>
           </provider>
         </entry>
@@ -81,17 +77,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Workers/listing.worker.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1540">
+            <state relative-caret-position="1815">
               <caret line="121" column="31" selection-start-line="121" selection-start-column="31" selection-end-line="121" selection-end-column="31" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Scrapers/mobile-de/detail.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1025">
-              <caret line="293" selection-start-line="293" selection-end-line="293" />
+            <state relative-caret-position="270">
+              <caret line="18" column="14" selection-start-line="18" selection-start-column="14" selection-end-line="18" selection-end-column="14" />
             </state>
           </provider>
         </entry>
@@ -99,8 +95,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/.env">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="240">
-              <caret line="16" column="20" selection-start-line="16" selection-start-column="20" selection-end-line="16" selection-end-column="20" />
+            <state relative-caret-position="225">
+              <caret line="15" selection-start-line="15" selection-end-line="16" selection-end-column="20" />
             </state>
           </provider>
         </entry>
@@ -109,16 +105,16 @@
         <entry file="file://$PROJECT_DIR$/Server/Engine/Chrome.js">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="270">
-              <caret line="18" column="21" lean-forward="true" selection-start-line="18" selection-start-column="21" selection-end-line="18" selection-end-column="21" />
+              <caret line="18" column="21" selection-start-line="18" selection-start-column="21" selection-end-line="18" selection-end-column="21" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Scrapers/mobile-de/listing.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="450">
-              <caret line="84" column="43" selection-start-line="84" selection-start-column="43" selection-end-line="84" selection-end-column="43" />
+            <state relative-caret-position="315">
+              <caret line="60" column="91" selection-start-line="60" selection-start-column="91" selection-end-line="60" selection-end-column="91" />
             </state>
           </provider>
         </entry>
@@ -149,8 +145,8 @@
         <option value="$PROJECT_DIR$/Workers/detail.worker.js" />
         <option value="$PROJECT_DIR$/Workers/listing.worker.js" />
         <option value="$PROJECT_DIR$/Server/DB/DB.js" />
-        <option value="$PROJECT_DIR$/Scrapers/mobile-de/listing.js" />
         <option value="$PROJECT_DIR$/Scrapers/mobile-de/detail.js" />
+        <option value="$PROJECT_DIR$/Scrapers/mobile-de/listing.js" />
       </list>
     </option>
   </component>
@@ -171,9 +167,9 @@
     </packageJsonPaths>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="55" />
+    <option name="x" value="987" />
     <option name="y" value="30" />
-    <option name="width" value="1865" />
+    <option name="width" value="933" />
     <option name="height" value="1050" />
   </component>
   <component name="ProjectView">
@@ -181,6 +177,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -240,7 +237,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -286,15 +282,18 @@
       <workItem from="1542103287314" duration="414000" />
       <workItem from="1542105217810" duration="23000" />
       <workItem from="1542136491884" duration="4425000" />
-      <workItem from="1542225593472" duration="28748000" />
+      <workItem from="1542225593472" duration="30706000" />
+      <workItem from="1542358838897" duration="380000" />
+      <workItem from="1542405932912" duration="620000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="54585000" />
+    <option name="totallyTimeSpent" value="57543000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="55" y="30" width="1865" height="1050" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.15652174" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -310,7 +309,7 @@
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="10" visible="true" weight="0.2698238" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="10" visible="true" weight="0.2610132" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -340,13 +339,7 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Models/listing_queue.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/Server/Engine/Engine.js">
       <provider selected="true" editor-type-id="text-editor">
@@ -369,10 +362,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/.env">
+    <entry file="file://$PROJECT_DIR$/Server/DB/DB.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="16" column="20" selection-start-line="16" selection-start-column="20" selection-end-line="16" selection-end-column="20" />
+        <state relative-caret-position="4140">
+          <caret line="276" column="4" selection-start-line="276" selection-start-column="4" selection-end-line="276" selection-end-column="4" />
         </state>
       </provider>
     </entry>
@@ -385,36 +378,36 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Workers/listing.worker.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1540">
+        <state relative-caret-position="1815">
           <caret line="121" column="31" selection-start-line="121" selection-start-column="31" selection-end-line="121" selection-end-column="31" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Server/DB/DB.js">
+    <entry file="file://$PROJECT_DIR$/Scrapers/mobile-de/detail.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="86">
-          <caret line="351" lean-forward="true" selection-start-line="351" selection-end-line="351" />
+        <state relative-caret-position="270">
+          <caret line="18" column="14" selection-start-line="18" selection-start-column="14" selection-end-line="18" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.env">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="15" selection-start-line="15" selection-end-line="16" selection-end-column="20" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Server/Engine/Chrome.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="270">
-          <caret line="18" column="21" lean-forward="true" selection-start-line="18" selection-start-column="21" selection-end-line="18" selection-end-column="21" />
+          <caret line="18" column="21" selection-start-line="18" selection-start-column="21" selection-end-line="18" selection-end-column="21" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Scrapers/mobile-de/listing.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="450">
-          <caret line="84" column="43" selection-start-line="84" selection-start-column="43" selection-end-line="84" selection-end-column="43" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Scrapers/mobile-de/detail.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1025">
-          <caret line="293" selection-start-line="293" selection-end-line="293" />
+        <state relative-caret-position="315">
+          <caret line="60" column="91" selection-start-line="60" selection-start-column="91" selection-end-line="60" selection-end-column="91" />
         </state>
       </provider>
     </entry>

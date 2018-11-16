@@ -29,7 +29,7 @@ class ListingWorker {
             })
         }
         else
-            global.loger.info('No more jobs to do. Please wait until all jobs finish.')
+            global.loger.info('No more jobs to do. Retrying for 5 seconds...')
         return job
     }
 
@@ -52,13 +52,13 @@ class ListingWorker {
                         run_sequence_id: job.run_sequence_id+1
                     })
 
-                    global.loger.info(`${this.spider} listing job finished ${job.id}`)
-                    global.AlertSvc(`${this.spider} listing job finished ${job.id}`)
+                    global.loger.info(`${this.spider} listing job finished ${job.id}`);
+                    global.AlertSvc(`${this.spider} listing job finished ${job.id}`);
                     resolve()
                 })
                 .catch(async err => {
                     global.loger.error(err)
-                    global.AlertSvc(`${this.spider} listing job error ${job.id}: ${err.message}`)
+                    global.AlertSvc(`${this.spider} listing job error ${job.id}: ${err.message}`);
                     if(job.num_failures < 5){
                         await this.push(job.id, {
                             status: 'READY',
@@ -67,8 +67,8 @@ class ListingWorker {
                         reject(err)
                     }
                     else {
-                        global.loger.warn(`${this.spider} listing job: ${job.id} skipped for too many failures`)
-                        global.AlertSvc(`${this.spider} listing job: ${job.id} skipped for too many failures`)
+                        global.loger.warn(`${this.spider} listing job: ${job.id} skipped for too many failures`);
+                        global.AlertSvc(`${this.spider} listing job: ${job.id} skipped for too many failures`);
                         await this.push(job.id, {
                             status: 'READY',
                             num_failures: job.num_failures+1
@@ -80,28 +80,28 @@ class ListingWorker {
     }
 
     async crawl(){
-        global.loger.info(`================> Getting new set of jobs <================`)
+        global.loger.info(`================> Getting new set of jobs <================`);
         const jobs = await this.pop(0), that = this;
         if(jobs.length === 0){
-            global.loger.info(`Finished.`)
-            return false;
+            await this.delay(5000)
+            return this.crawl()
         }
         (async function loop(i) {
             if(jobs[i] === undefined){
                 if(that.queue.pendingPromises === 0){
-                    global.loger.info(`All finished, return`)
+                    global.loger.info(`All finished, return`);
                     return that.crawl()
                 }
                 else {
                     await that.delay(1000)
-                    global.loger.debug(`Waiting for all jobs finish...`)
+                    global.loger.debug(`Waiting for all jobs finish...`);
                     return loop(i)
                 }
             }
             const job = jobs[i]
-            const queueCapacity = that.queueLimit - that.queue.getQueueLength()
+            const queueCapacity = that.queueLimit - that.queue.getQueueLength();
             if(queueCapacity <= 0){
-                global.loger.debug(`queue full --> waiting....`)
+                global.loger.debug(`queue full --> waiting....`);
                 await that.delay(2000)
                 return loop(i)
             }

@@ -29,7 +29,7 @@ class DetailWorker {
             })
         }
         else
-            global.loger.info('No more jobs to do. Please wait until all jobs finish.')
+            global.loger.info('No more jobs to do. Retrying for 5 seconds...')
         return job
     }
 
@@ -81,8 +81,8 @@ class DetailWorker {
         global.loger.info(`================> Getting new set of jobs <================`)
         const jobs = await this.pop(0), that = this;
         if(jobs.length === 0){
-            global.loger.info(`Finished.`)
-            return false;
+            await this.delay(5000)
+            return this.crawl()
         }
         (async function loop(i) {
             if(jobs[i] === undefined){

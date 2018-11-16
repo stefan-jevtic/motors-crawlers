@@ -14,8 +14,8 @@ class Listing extends mobilede {
     Run(job) {
         return new Promise(async (resolve, reject) => {
             let that = this, url;
-            let links = [];
-            links.push(job.start_url);
+            let links = ['https://suchen.mobile.de/fahrzeuge/search.html?cn=IT&damageUnrepaired=NO_DAMAGE_UNREPAIRED&grossPrice=false&isSearchRequest=true&makeModelVariant1.makeId=22200&maxPowerAsArray=KW&minPowerAsArray=KW&scopeId=TO75&usage=USED'];
+        //    links.push(job.start_url);
             const engine = await Engine.create(this.type, this.EngineOptions)
                 .catch(err => {
                     console.error(err, 'Failed to initialize search engine. Aborting.');
@@ -58,8 +58,10 @@ class Listing extends mobilede {
                                 global.loger.debug('Solving captcha...')
                                 await engine.request.Page.waitForSelector('div.antigate_solver.recaptcha.solved',{'timeout':200000});
                                 await engine.request.Page.click('.btn.btn--orange.u-full-width');
-                                await engine.request.Page.waitForNavigation({'timeout':20000});
+                                await engine.request.Page.waitForNavigation({'timeout':6000});
                                 global.loger.debug('CAPTCHA SOLVED, CONTINUING...')
+                                const cookies = await engine.request.Page.cookies()
+                                await engine.request.Page.setCookie(...cookies)
                                 let Body  = await engine.request.Page.content();
                                 $ = that.cheerio.load(Body);
                                 pagination = $(".pagination li span").not(":has(i)");
