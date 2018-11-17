@@ -31,7 +31,7 @@ module.exports = function(sequelize, DataTypes) {
     last_page: {
       type: DataTypes.INTEGER(11),
       allowNull: false,
-      defaultValue: '0'
+      defaultValue: 1
     },
     status: {
       type: DataTypes.ENUM('READY','RESERVED'),

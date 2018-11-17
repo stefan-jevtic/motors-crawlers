@@ -4,9 +4,9 @@ const sequelize = require('../Models/index').sequelize;
 class ListingWorker {
 
     constructor(spider, engine){
-        this.queueConcurrency = parseInt(process.env.DETAIL_MAX_CONCURRENCY);
-        this.queueInterval = parseInt(process.env.DETAIL_INTERVAL);
-        this.queueLimit = parseInt(process.env.MAX_COMPETITOR_QUEUE);
+        this.queueConcurrency = parseInt(process.env.LISTING_MAX_CONCURRENCY);
+        this.queueInterval = parseInt(process.env.LISTING_INTERVAL);
+        this.queueLimit = parseInt(process.env.LISTING_MAX_COMPETITOR_QUEUE);
         const Listing = require(`../Scrapers/${spider}/listing`);
         this.test = new Listing(engine);
         this.spider = spider;
@@ -49,7 +49,8 @@ class ListingWorker {
                         finished_at: new Date(),
                         num_failures: 0,
                         status: 'READY',
-                        run_sequence_id: job.run_sequence_id+1
+                        run_sequence_id: job.run_sequence_id+1,
+                        last_page: 1
                     })
 
                     global.loger.info(`${this.spider} listing job finished ${job.id}`);
@@ -58,22 +59,24 @@ class ListingWorker {
                 })
                 .catch(async err => {
                     global.loger.error(err)
-                    global.AlertSvc(`${this.spider} listing job error ${job.id}: ${err.message}`);
+                    global.AlertSvc(`${this.spider} listing job error ${job.id}: ${err.err.message}`)
                     if(job.num_failures < 5){
                         await this.push(job.id, {
                             status: 'READY',
-                            num_failures: job.num_failures+1
+                            num_failures: job.num_failures+1,
+                            last_page: err.latest_page
                         })
-                        reject(err)
+                        reject(err.err)
                     }
                     else {
                         global.loger.warn(`${this.spider} listing job: ${job.id} skipped for too many failures`);
                         global.AlertSvc(`${this.spider} listing job: ${job.id} skipped for too many failures`);
                         await this.push(job.id, {
                             status: 'READY',
-                            num_failures: job.num_failures+1
+                            num_failures: job.num_failures+1,
+                            last_page: err.latest_page
                         })
-                        reject(err)
+                        reject(err.err)
                     }
                 })
         })

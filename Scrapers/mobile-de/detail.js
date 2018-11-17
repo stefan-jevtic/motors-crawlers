@@ -17,7 +17,6 @@ class Detail extends mobilede {
         return new Promise(async (resolve, reject) => {
             let url = job.start_url;
             //url = 'https://suchen.mobile.de/fahrzeuge/details.html?id=269018400&cn=PL&damageUnrepaired=NO_DAMAGE_UNREPAIRED&grossPrice=false&isSearchRequest=true&makeModelVariant1.makeId=12100&pageNumber=1&scopeId=STT&usage=USED&fnai=prev&searchId=85fbfaff-5189-5d8e-5642-1c248f17da82';
-            console.log(url);
             const engine = await Engine.create(this.type, this.EngineOptions)
                 .catch(err => {
                     console.error(err, 'Failed to initialize search engine. Aborting.');

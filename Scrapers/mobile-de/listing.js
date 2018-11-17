@@ -15,6 +15,9 @@ class Listing extends mobilede {
         return new Promise(async (resolve, reject) => {
             let that = this, url;
             let links = [];
+            let latest_page = parseInt(job.last_page)
+            if(latest_page > 1)
+                job.start_url = job.start_url.replace(/maxPowerAsArray=[A-z]+&minPowerAsArray=[A-z]+/g, `pageNumber=${latest_page}`)
             links.push(job.start_url);
             const engine = await Engine.create(this.type, this.EngineOptions)
                 .catch(err => {
@@ -48,11 +51,8 @@ class Listing extends mobilede {
                                 'origin_url':url,
                                 'run_sequence_id':run_sequence_id
                             }
-                            let pagination = $(".pagination li span").not(":has(i)");
-                            for(let p = 1; p < pagination.length; p++){
-                                if(links.indexOf($(pagination[p]).attr('data-href')) === -1)
-                                    links.push($(pagination[p]).attr('data-href'))
-                            }
+                            if($('.pagination span.rbt-page-forward').length)
+                                links.push($('.pagination span.rbt-page-forward').attr('data-href'))
                             if($('title').text().indexOf('Are you a human')>-1){
                                 global.loger.warn('CAPTCHA OCCURS!')
                                 global.loger.debug('Solving captcha...')
@@ -64,20 +64,19 @@ class Listing extends mobilede {
                                 await engine.request.Page.setCookie(...cookies)
                                 let Body  = await engine.request.Page.content();
                                 $ = that.cheerio.load(Body);
-                                pagination = $(".pagination li span").not(":has(i)");
-                                for(let p = 1; p < pagination.length; p++){
-                                    if(links.indexOf($(pagination[p]).attr('data-href')) === -1)
-                                        links.push($(pagination[p]).attr('data-href'))
-                                }
+                                if($('.pagination span.rbt-page-forward').length)
+                                    links.push($('.pagination span.rbt-page-forward').attr('data-href'))
                                 that.ParsePage($, url_obj,url, function (err,status) {
                                     if(err)
                                         throw err
+                                    ++latest_page;
                                     return loop(++i);
                                 })
                             }else{
                                 that.ParsePage($, url_obj,url, function (err,status) {
                                     if(err)
                                         throw err
+                                    ++latest_page;
                                     return loop(++i);
                                 })
                             }
@@ -85,12 +84,12 @@ class Listing extends mobilede {
                         catch (e) {
                             console.error(e);
                             engine.close();
-                            return reject(e)
+                            return reject({err: e, latest_page})
                         }
                     })
                     .catch(err => {
                         engine.close()
-                        return reject(err)
+                        return reject({err: err, latest_page})
                     })
             })(0)
         })
