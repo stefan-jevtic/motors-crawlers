@@ -16,8 +16,8 @@ class Listing extends mobilede {
             let that = this, url;
             let links = [];
             let latest_page = parseInt(job.last_page)
-            if(latest_page > 1)
-                job.start_url = job.start_url.replace(/maxPowerAsArray=[A-z]+&minPowerAsArray=[A-z]+/g, `pageNumber=${latest_page}`)
+            if(latest_page > 0)
+                job.start_url = job.start_url.replace(/maxPowerAsArray=[A-z]+&minPowerAsArray=[A-z]+/g, `pageNumber=${latest_page + 1}`)
             links.push(job.start_url);
             const engine = await Engine.create(this.type, this.EngineOptions)
                 .catch(err => {
@@ -66,17 +66,17 @@ class Listing extends mobilede {
                                 $ = that.cheerio.load(Body);
                                 if($('.pagination span.rbt-page-forward').length)
                                     links.push($('.pagination span.rbt-page-forward').attr('data-href'))
-                                that.ParsePage($, url_obj,url, function (err,status) {
+                                that.ParsePage($, url_obj,url, async function (err,status) {
                                     if(err)
                                         throw err
-                                    ++latest_page;
+                                    await that.DB.updateLastPage(job.id, ++latest_page);
                                     return loop(++i);
                                 })
                             }else{
-                                that.ParsePage($, url_obj,url, function (err,status) {
+                                that.ParsePage($, url_obj,url, async function (err,status) {
                                     if(err)
                                         throw err
-                                    ++latest_page;
+                                    await that.DB.updateLastPage(job.id, ++latest_page);
                                     return loop(++i);
                                 })
                             }
@@ -84,12 +84,12 @@ class Listing extends mobilede {
                         catch (e) {
                             console.error(e);
                             engine.close();
-                            return reject({err: e, latest_page})
+                            return reject(e)
                         }
                     })
                     .catch(err => {
                         engine.close()
-                        return reject({err: err, latest_page})
+                        return reject(err)
                     })
             })(0)
         })
@@ -100,7 +100,7 @@ class Listing extends mobilede {
         let element = $('a.result-item');
         try{
 
-         let pom ={};
+            let pom ={};
             for(let i =0;i<element.length;i++){
                 offer_id = $(element[i]).attr('data-ad-id');
                 url = 'https://suchen.mobile.de/fahrzeuge/details.html?id='+offer_id+'&lang=en';

@@ -1,5 +1,6 @@
 const DB = require('./../../Models/index');
 const moment = require('moment');
+const offers = require('./../../Models/index').offers;
 
 class Database {
 
@@ -12,6 +13,10 @@ class Database {
             })
         })
 
+    }
+
+    updateLastPage(id, last_page){
+        return DB.listing_queue.update({ last_page }, { where: { id } })
     }
 
     getBrand(source_id,brand_id){
@@ -41,39 +46,29 @@ class Database {
 
         for(let i=0;i<item.length;i++){
             let key = keys[i];
-            DB.sequelize.query('INSERT IGNORE INTO offers(scope, country_code, brand_id, brand, cond, currency, price_net, price_gross, vat, offer_id, source_id, url, run_sequence_id, origin_url, created_at, updated_at)' +
-                'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-                {
-                    replacements: [
-                        item[key]['scope'],
-                        item[key]['country_code'],
-                        item[key]['brand_id'],
-                        item[key]['brand'],
-                        item[key]['condition'],
-                        item[key]['currency'],
-                        item[key]['price_net'],
-                        item[key]['price_gross'],
-                        item[key]['vat'],
-                        item[key]['offer_id'],
-                        item[key]['source_id'],
-                        item[key]['url'],
-                        item[key]['run_sequence_id']+1,
-                        item[key]['origin_url'],
-                        new Date(),
-                        new Date()
-                    ],
-                    type: DB.sequelize.QueryTypes.INSERT
-                }).then(result => {
-                console.log('insertovao')
-            })
+            offers.upsert({
+                scope:item[key]['scope'],
+                country_code:item[key]['country_code'],
+                brand_id:item[key]['brand_id'],
+                brand:item[key]['brand'],
+                cond:item[key]['condition'],
+                currency:item[key]['currency'],
+                price_net:item[key]['price_net'],
+                price_gross:item[key]['price_gross'],
+                vat:item[key]['vat'],
+                offer_id:item[key]['offer_id'],
+                source_id:item[key]['source_id'],
+                url:item[key]['url'],
+                run_sequence_id:item[key]['run_sequence_id']+1,
+                origin_url:origin_url,
+                created_at:new Date(),
+                finished_at:new Date()
+            }).then(result => {  });
 
             this.insert_offer_mappings(item[key]['origin_url'],item[key]['source_id'],item[key]['offer_id'],item[key]['brand_id'],item[key]['brand']);
 
             this.enqueue_detail_urls(item[key]['url'],'mobile-de');
         }
-
-
-
     }
 
 
@@ -149,6 +144,7 @@ class Database {
     }
 
 
+
     delete_offers(origin_url){
         DB.sequelize.query('DELETE FROM offers WHERE origin_url=?',
             {
@@ -196,7 +192,7 @@ class Database {
             else if(item[key]['attribute_key']=='title' && item[key['value']]){
                 offer_id = item[key]['offer_id'];
                 source_id = item[key]['source_id'];
-                that.update_offer_ttile(item[key]['value'],item[key]['offer_id'],item[key]['source_id'])
+                that.update_offer_title(item[key]['value'],item[key]['offer_id'],item[key]['source_id'])
             }
             else if(item[key]['attribute_key']=='photo_url' && item[key['value']]){
                 offer_id = item[key]['offer_id'];
@@ -219,7 +215,7 @@ class Database {
             if(reseller){
                 reseller_id = reseller['id'];
             }else {
-                let reseler_data = await that.enrich_reseller(reseller_item[0])
+                let reseler_data = await that.enrich_reseller(reseller_item[0]);
                 reseller_id = await that.create_reseller(reseler_data);
 
             }
@@ -227,7 +223,7 @@ class Database {
         }
 
 
-       that.update_offer_dealer(reseller_id,offer_id,source_id);
+        that.update_offer_dealer(reseller_id,offer_id,source_id);
 
 
 
@@ -261,13 +257,13 @@ class Database {
     }
 
 
-    update_offer_ttile(title,offer_id,soruce_id){
+    update_offer_title(title,offer_id,source_id){
         DB.sequelize.query('UPDATE offers_mapping SET title=? WHERE offer_id=? AND source_id=? AND title IS NULL',
             {
                 replacements: [
                     title,
                     offer_id,
-                    soruce_id
+                    source_id
                 ],
                 type: DB.sequelize.QueryTypes.UPDATE
             })

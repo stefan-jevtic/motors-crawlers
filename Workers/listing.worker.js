@@ -50,7 +50,7 @@ class ListingWorker {
                         num_failures: 0,
                         status: 'READY',
                         run_sequence_id: job.run_sequence_id+1,
-                        last_page: 1
+                        last_page: 0
                     })
 
                     global.loger.info(`${this.spider} listing job finished ${job.id}`);
@@ -59,24 +59,22 @@ class ListingWorker {
                 })
                 .catch(async err => {
                     global.loger.error(err)
-                    global.AlertSvc(`${this.spider} listing job error ${job.id}: ${err.err.message}`)
+                    global.AlertSvc(`${this.spider} listing job error ${job.id}: ${err.message}`);
                     if(job.num_failures < 5){
                         await this.push(job.id, {
                             status: 'READY',
-                            num_failures: job.num_failures+1,
-                            last_page: err.latest_page
+                            num_failures: job.num_failures+1
                         })
-                        reject(err.err)
+                        reject(err)
                     }
                     else {
                         global.loger.warn(`${this.spider} listing job: ${job.id} skipped for too many failures`);
                         global.AlertSvc(`${this.spider} listing job: ${job.id} skipped for too many failures`);
                         await this.push(job.id, {
                             status: 'READY',
-                            num_failures: job.num_failures+1,
-                            last_page: err.latest_page
+                            num_failures: job.num_failures+1
                         })
-                        reject(err.err)
+                        reject(err)
                     }
                 })
         })
