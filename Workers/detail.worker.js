@@ -83,7 +83,7 @@ class DetailWorker {
         let that = this, jobs = [];
         (async function loop(i) {
             const queueCapacity = that.queueLimit - (that.queue.getQueueLength()+that.queue.getPendingLength());
-            if(queueCapacity > 0 && i >= jobs.length){
+            if(queueCapacity > 0 && jobs.length < that.queueLimit){
                 let set = await that.pop(queueCapacity);
                 if(set.length === 0){
                     await that.delay(5000)
@@ -91,12 +91,12 @@ class DetailWorker {
                 }
                 jobs.push(...set)
             }
-            if(jobs[i] === undefined){
+            if(jobs[0] === undefined){
                 await that.delay(1000)
                 global.loger.debug(`Waiting for a free spot to get new jobs...`)
                 return loop(i)
             }
-            const job = jobs[i]
+            const job = jobs[0]
             if(queueCapacity <= 0){
                 global.loger.debug(`queue full --> waiting....`)
                 await that.delay(2000)
@@ -106,6 +106,7 @@ class DetailWorker {
                 await that.singleJob(job)
                     .catch(err => console.log(err))
             })
+            jobs.splice(0, 1)
             global.loger.debug(`Currently working: ${that.queue.pendingPromises}/${that.queue.maxPendingPromises}; Queued: ${that.queue.getQueueLength()}/${that.queue.maxQueuedPromises}`)
             return loop(++i)
         })(0)
