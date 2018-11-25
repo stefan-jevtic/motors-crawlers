@@ -16,7 +16,7 @@ class DetailWorker {
     }
 
     async pop(num){
-        const q = `SELECT * FROM detail_queue WHERE spider=:spider AND ((status='READY' AND num_failures<5 AND finished_at IS NULL) OR (status='RESERVED' AND reserved_at<(NOW() - INTERVAL 15 MINUTE) AND num_failures<5)) LIMIT 1`
+        const q = `SELECT * FROM detail_queue WHERE spider=:spider AND ((status='READY' AND num_failures<5 AND finished_at IS NULL) OR (status='RESERVED' AND reserved_at<(NOW() - INTERVAL 15 MINUTE) AND num_failures<5)) LIMIT ${num}`
         const job = await sequelize.query(q, {
             replacements: { spider: this.spider},
             type: sequelize.QueryTypes.SELECT
@@ -79,7 +79,8 @@ class DetailWorker {
 
     async crawl(){
         global.loger.info(`================> Getting new set of jobs <================`)
-        const jobs = await this.pop(0), that = this;
+        const queueCapacity = this.queueLimit - (this.queue.getQueueLength()+this.queue.getPendingLength());
+        const jobs = await this.pop(queueCapacity), that = this;
         if(jobs.length === 0){
             await this.delay(5000)
             return this.crawl()
@@ -97,7 +98,6 @@ class DetailWorker {
                 }
             }
             const job = jobs[i]
-            const queueCapacity = that.queueLimit - that.queue.getQueueLength()
             if(queueCapacity <= 0){
                 global.loger.debug(`queue full --> waiting....`)
                 await that.delay(2000)

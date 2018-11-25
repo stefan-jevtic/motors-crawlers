@@ -58,7 +58,7 @@ class Listing extends mobilede {
                                 global.loger.debug('Solving captcha...')
                                 await engine.request.Page.waitForSelector('div.antigate_solver.recaptcha.solved',{'timeout':200000});
                                 await engine.request.Page.click('.btn.btn--orange.u-full-width');
-                                await engine.request.Page.waitForNavigation({'timeout':60000});
+                                await engine.request.Page.waitForNavigation({'timeout':90000});
                                 global.loger.debug('CAPTCHA SOLVED, CONTINUING...')
                                 const cookies = await engine.request.Page.cookies()
                                 await engine.request.Page.setCookie(...cookies)
@@ -82,8 +82,8 @@ class Listing extends mobilede {
                             }
                         }
                         catch (e) {
-                            console.error(e);
-                            engine.close();
+                            console.error(e)
+                            engine.close()
                             return reject(e)
                         }
                     })
@@ -107,18 +107,24 @@ class Listing extends mobilede {
                 hasOfferPrice = $(element[i]).find('.price-block span.h2.u-text-line-through').text();
                 if(!hasOfferPrice){
                     price_net =  $(element[i]).find('a.result-item span.u-block').eq(0).text().replace(/[^0-9\,]/gi, '');
-                    if(price_net)price_net=price_net.replace(',','.');
+                    if(price_net)price_net=price_net.replace(',','');
                     price_gross = $(element[i]).find('a.result-item span.u-block').eq(1).text().replace(/[^0-9\,]/gi, '');
-                    if(price_gross)price_gross=price_gross.replace(',','.');
+                    if(price_gross)
+                        price_gross=price_gross.replace(',','');
+                    else
+                        price_gross=null;
                     vat = $(element[i]).find('a.result-item span.u-block').eq(2).text().replace(/[^0-9\,]/gi, '');
-                    if(vat)vat=vat.replace(',','.');
+                    if(vat)vat=
+                        vat.replace(',','');
+                    else
+                        vat=null;
                 }else{
                     price_net =  $(element[i]).find('a.result-item span.u-block').eq(1).text().replace(/[^0-9\,]/gi, '');
-                    if(price_net)price_net=price_net.replace(',','.');
+                    if(price_net)price_net=price_net.replace(',','');
                     price_gross = $(element[i]).find('a.result-item span.u-block').eq(2).text().replace(/[^0-9\,]/gi, '');
-                    if(price_gross)price_gross=price_gross.replace(',','.');
+                    if(price_gross)price_gross=price_gross.replace(',','');
                     vat = $(element[i]).find('a.result-item span.u-block').eq(3).text().replace(/[^0-9\,]/gi, '');
-                    if(vat)vat=vat.replace(',','.');
+                    if(vat)vat=vat.replace(',','');
                 }
                 url_obj['offer_id']= offer_id;
                 url_obj['price_net']= price_net;

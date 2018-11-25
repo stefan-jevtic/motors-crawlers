@@ -16,7 +16,7 @@ class ListingWorker {
     }
 
     async pop(num){
-        const q = `SELECT * FROM listing_queue WHERE spider=:spider AND ((status='READY' AND num_failures<5 AND (finished_at IS NULL OR finished_at<(NOW() - INTERVAL 3 DAY))) OR (status='RESERVED' AND reserved_at<(NOW() - INTERVAL 15 MINUTE) AND num_failures<5)) LIMIT 1`
+        const q = `SELECT * FROM listing_queue WHERE spider=:spider AND ((status='READY' AND num_failures<5 AND (finished_at IS NULL OR finished_at<(NOW() - INTERVAL 3 DAY))) OR (status='RESERVED' AND reserved_at<(NOW() - INTERVAL 15 MINUTE) AND num_failures<5)) LIMIT ${num}`
         const job = await sequelize.query(q, {
             replacements: { spider: this.spider},
             type: sequelize.QueryTypes.SELECT
@@ -53,13 +53,13 @@ class ListingWorker {
                         last_page: 0
                     })
 
-                    global.loger.info(`${this.spider} listing job finished ${job.id}`);
-                    global.AlertSvc(`${this.spider} listing job finished ${job.id}`);
+                    global.loger.info(`${this.spider} listing job finished ${job.id}`)
+                    global.AlertSvc(`${this.spider} listing job finished ${job.id}`)
                     resolve()
                 })
                 .catch(async err => {
                     global.loger.error(err)
-                    global.AlertSvc(`${this.spider} listing job error ${job.id}: ${err.message}`);
+                    global.AlertSvc(`${this.spider} listing job error ${job.id}: ${err.message}`)
                     if(job.num_failures < 5){
                         await this.push(job.id, {
                             status: 'READY',
@@ -68,8 +68,8 @@ class ListingWorker {
                         reject(err)
                     }
                     else {
-                        global.loger.warn(`${this.spider} listing job: ${job.id} skipped for too many failures`);
-                        global.AlertSvc(`${this.spider} listing job: ${job.id} skipped for too many failures`);
+                        global.loger.warn(`${this.spider} listing job: ${job.id} skipped for too many failures`)
+                        global.AlertSvc(`${this.spider} listing job: ${job.id} skipped for too many failures`)
                         await this.push(job.id, {
                             status: 'READY',
                             num_failures: job.num_failures+1
@@ -81,8 +81,9 @@ class ListingWorker {
     }
 
     async crawl(){
-        global.loger.info(`================> Getting new set of jobs <================`);
-        const jobs = await this.pop(0), that = this;
+        global.loger.info(`================> Getting new set of jobs <================`)
+        const queueCapacity = this.queueLimit - (this.queue.getQueueLength()+this.queue.getPendingLength());
+        const jobs = await this.pop(queueCapacity), that = this;
         if(jobs.length === 0){
             await this.delay(5000)
             return this.crawl()
@@ -90,19 +91,18 @@ class ListingWorker {
         (async function loop(i) {
             if(jobs[i] === undefined){
                 if(that.queue.pendingPromises === 0){
-                    global.loger.info(`All finished, return`);
+                    global.loger.info(`All finished, return`)
                     return that.crawl()
                 }
                 else {
                     await that.delay(1000)
-                    global.loger.debug(`Waiting for all jobs finish...`);
+                    global.loger.debug(`Waiting for all jobs finish...`)
                     return loop(i)
                 }
             }
             const job = jobs[i]
-            const queueCapacity = that.queueLimit - that.queue.getQueueLength();
             if(queueCapacity <= 0){
-                global.loger.debug(`queue full --> waiting....`);
+                global.loger.debug(`queue full --> waiting....`)
                 await that.delay(2000)
                 return loop(i)
             }
