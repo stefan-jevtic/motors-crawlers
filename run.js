@@ -16,7 +16,6 @@ const Worker = autoloader.load(`${__dirname}/Workers/`)[`${worker}.worker`];
 
 const w = new Worker(spider, engine);
 w.crawl()
-.catch(err => console.log(err));
 
 process.on('unhandledRejection', reason => {
     global.loger.error(`Unhandled Rejection: ${reason}`);

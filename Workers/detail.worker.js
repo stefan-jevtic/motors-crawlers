@@ -23,10 +23,12 @@ class DetailWorker {
         })
 
         if(job.length){
-            this.push(job[0].id, {
-                reserved_at: new Date(),
-                status: 'RESERVED'
-            })
+            for(let x = 0; x < job.length; x++){
+                await this.push(job[x].id, {
+                    reserved_at: new Date(),
+                    status: 'RESERVED'
+                })
+            }
         }
         else
             global.loger.info('No more jobs to do. Retrying for 5 seconds...')
@@ -77,25 +79,22 @@ class DetailWorker {
         })
     }
 
-    async crawl(){
-        global.loger.info(`================> Getting new set of jobs <================`)
-        const queueCapacity = this.queueLimit - (this.queue.getQueueLength()+this.queue.getPendingLength());
-        const jobs = await this.pop(queueCapacity), that = this;
-        if(jobs.length === 0){
-            await this.delay(5000)
-            return this.crawl()
-        }
+    crawl(){
+        let that = this, jobs = [];
         (async function loop(i) {
-            if(jobs[i] === undefined){
-                if(that.queue.pendingPromises === 0){
-                    global.loger.info(`All finished, return`)
-                    return that.crawl()
-                }
-                else {
-                    await that.delay(1000)
-                    global.loger.debug(`Waiting for all jobs finish...`)
+            const queueCapacity = that.queueLimit - (that.queue.getQueueLength()+that.queue.getPendingLength());
+            if(queueCapacity > 0 && i >= jobs.length){
+                let set = await that.pop(queueCapacity);
+                if(set.length === 0){
+                    await that.delay(5000)
                     return loop(i)
                 }
+                jobs.push(...set)
+            }
+            if(jobs[i] === undefined){
+                await that.delay(1000)
+                global.loger.debug(`Waiting for a free spot to get new jobs...`)
+                return loop(i)
             }
             const job = jobs[i]
             if(queueCapacity <= 0){
