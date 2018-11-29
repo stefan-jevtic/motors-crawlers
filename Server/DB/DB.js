@@ -1,10 +1,13 @@
 const DB = require('./../../Models/index');
 const moment = require('moment');
 const offers = require('./../../Models/index').offers;
+const GeoApi = require('./../../Utils/GoogleGeoApi/GoogleGeoApi');
 
 class Database {
 
-    constructor(){  }
+    constructor(){
+        this.GeoLocation = new GeoApi();
+    }
 
     getListingLinks(){
         return new Promise((resolve) => {
@@ -144,7 +147,6 @@ class Database {
     }
 
 
-
     delete_offers(origin_url){
         DB.sequelize.query('DELETE FROM offers WHERE origin_url=?',
             {
@@ -231,7 +233,7 @@ class Database {
     }
 
     update_offer_dealer(reseller_id,offer_id,source_id){
-        DB.sequelize.query('UPDATE offers_mapping SET dealer_id=? WHERE offer_id=? AND source_id=? AND dealer_id IS NULL',
+        DB.sequelize.query('UPDATE offers_mapping SET dealer_id=? WHERE offer_id=? AND source_id=? AND dealer_id IS null',
             {
                 replacements: [
                     reseller_id,
@@ -244,7 +246,7 @@ class Database {
     }
 
     update_offer_description(desc,offer_id,source_id){
-        DB.sequelize.query('UPDATE offers_mapping SET description=? WHERE offer_id= ? AND source_id= ? AND description IS NULL',
+        DB.sequelize.query('UPDATE offers_mapping SET description=? WHERE offer_id= ? AND source_id= ? AND description IS null',
             {
                 replacements: [
                     desc,
@@ -258,7 +260,7 @@ class Database {
 
 
     update_offer_title(title,offer_id,source_id){
-        DB.sequelize.query('UPDATE offers_mapping SET title=? WHERE offer_id=? AND source_id=? AND title IS NULL',
+        DB.sequelize.query('UPDATE offers_mapping SET title=? WHERE offer_id=? AND source_id=? AND title IS null',
             {
                 replacements: [
                     title,
@@ -271,7 +273,7 @@ class Database {
     }
 
     update_offer_photo_url(photo_url,offer_id,source_id){
-        DB.sequelize.query('UPDATE offers_mapping SET photo_url=? WHERE offer_id=? AND source_id=? AND photo_url IS NULL',
+        DB.sequelize.query('UPDATE offers_mapping SET photo_url=? WHERE offer_id=? AND source_id=? AND photo_url IS null',
             {
                 replacements: [
                     photo_url,
@@ -350,7 +352,88 @@ class Database {
     }
 
 
-    enrich_reseller(item){
+    async enrich_reseller(item){
+        let reseller = {},geodata,settingsApi,that=this;
+        reseller['name'] = item['name'];
+        reseller['reseller_code'] = item['reseller_code'];
+        reseller['country_code'] = item['country_code'];
+        reseller['reseller_type'] = item['reseller_type'];
+        reseller['url'] = item['url'];
+        reseller['logo'] = item['logo'];
+        reseller['votes'] = item['votes'];
+        reseller['rating'] = item['rating'];
+        reseller['phone'] = item['phone'];
+        reseller['full_address'] = item['full_address'];
+        reseller['source_code'] = item['source_code'];
+        reseller['geo_lat'] = '';
+        reseller['geo_lng'] = '';
+        reseller['street_number'] = '';
+        reseller['route'] = '';
+        reseller['locality'] = '';
+        reseller['admin_area_level_2'] = '';
+        reseller['admin_area_level_1'] = '';
+        reseller['country'] = '';
+        reseller['postal_code'] = '';
+        reseller['geo_bounds_south_lat'] = '';
+        reseller['geo_bounds_south_lng'] = '';
+        reseller['geo_bounds_north_lng'] = '';
+        reseller['geo_bounds_north_lat'] = '';
+        reseller['place_id'] = '';
+
+
+        geodata = await that.GeoLocation.GeoApiCall(reseller['full_address']);
+
+
+        if(geodata){
+
+            reseller['geo_lat'] = geodata['geometry']['location']['lat'];
+            reseller['geo_lng'] = geodata['geometry']['location']['lng'];
+        }
+
+        if('bounds' in geodata['geometry']){
+
+            reseller['geo_bounds_south_lat'] = geodata['geometry']['bounds']['southwest']['lat'];
+            reseller['geo_bounds_south_lng'] = geodata['geometry']['bounds']['southwest']['lng'];
+            reseller['geo_bounds_north_lng'] = geodata['geometry']['bounds']['northeast']['lat'];
+            reseller['geo_bounds_north_lat'] = geodata['geometry']['bounds']['northeast']['lng'];
+
+        }
+
+        if('place_id' in geodata['geometry']){
+            reseller['place_id'] = geodata['place_id']
+        }
+
+        if('place_id' in geodata){
+            reseller['place_id'] = geodata['place_id']
+        }
+
+        if('address_components' in geodata){
+            for(let address_component in geodata['address_components']){
+
+                if('street_number' in address_component['types']){
+                    reseller['street_number'] = address_component['short_name']
+                }else if('route' in address_component['types']){
+                    reseller['route'] = address_component['short_name']
+                }else if('locality' in address_component['types']){
+                    reseller['locality'] = address_component['short_name']
+                }else if('administrative_area_level_2' in address_component['types']){
+                    reseller['admin_area_level_2'] = address_component['short_name']
+                }else if('administrative_area_level_1' in address_component['types']){
+                    reseller['admin_area_level_1'] = address_component['short_name']
+                }else if('country' in address_component['types']){
+                    reseller['country'] = address_component['short_name']
+                }else if('postal_code' in address_component['types']){
+                    reseller['postal_code'] = address_component['short_name']
+                }
+
+
+
+            }
+        }
+
+
+        return reseller
+
 
 
     }
@@ -398,8 +481,6 @@ class Database {
 
 
     }
-
-
 
 
 }

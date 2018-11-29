@@ -16,7 +16,7 @@ class ListingWorker {
     }
 
     async pop(num){
-        const q = `SELECT * FROM listing_queue WHERE spider=:spider AND ((status='READY' AND num_failures<5 AND (finished_at IS NULL OR finished_at<(NOW() - INTERVAL 3 DAY))) OR (status='RESERVED' AND reserved_at<(NOW() - INTERVAL 15 MINUTE) AND num_failures<5)) LIMIT ${num}`
+        const q = `SELECT * FROM listing_queue WHERE spider=:spider AND ((status='READY' AND num_failures<5 AND (finished_at IS NULL OR finished_at<(NOW() - INTERVAL 3 DAY))) OR (status='RESERVED' AND reserved_at<(NOW() - INTERVAL 15 MINUTE) AND num_failures<5)) ORDER BY finished_at ASC LIMIT ${num}`
         const job = await sequelize.query(q, {
             replacements: { spider: this.spider},
             type: sequelize.QueryTypes.SELECT

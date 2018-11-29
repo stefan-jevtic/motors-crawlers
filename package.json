@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google/maps": "^0.5.5",
     "anticaptcha": "^1.0.4",
     "auto-loader": "^0.2.0",
     "bluebird": "^3.5.2",
