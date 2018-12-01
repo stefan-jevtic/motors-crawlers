@@ -1,3 +1,13 @@
+/*
+* todo: povezati google api sa reseller i testirati api i dovrsiti reseller_enrich
+*
+*
+*
+* */
+
+
+
+
 const DB = require('./../../Models/index');
 const moment = require('moment');
 const offers = require('./../../Models/index').offers;
@@ -6,7 +16,10 @@ const GeoApi = require('./../../Utils/GoogleGeoApi/GoogleGeoApi');
 class Database {
 
     constructor(){
+
         this.GeoLocation = new GeoApi();
+
+
     }
 
     getListingLinks(){
@@ -210,13 +223,12 @@ class Database {
 
 
         }
-
         if(reseller_item.length){
-
-            reseller = that.get_resseler(reseller_item[0]);
-            if(reseller){
+            reseller = await that.get_resseler(reseller_item[0]);
+            if(reseller.length){
                 reseller_id = reseller['id'];
             }else {
+                console.log('usao u resseler');
                 let reseler_data = await that.enrich_reseller(reseller_item[0]);
                 reseller_id = await that.create_reseller(reseler_data);
 
@@ -354,85 +366,90 @@ class Database {
 
     async enrich_reseller(item){
         let reseller = {},geodata,settingsApi,that=this;
-        reseller['name'] = item['name'];
-        reseller['reseller_code'] = item['reseller_code'];
-        reseller['country_code'] = item['country_code'];
-        reseller['reseller_type'] = item['reseller_type'];
-        reseller['url'] = item['url'];
-        reseller['logo'] = item['logo'];
-        reseller['votes'] = item['votes'];
-        reseller['rating'] = item['rating'];
-        reseller['phone'] = item['phone'];
-        reseller['full_address'] = item['full_address'];
-        reseller['source_code'] = item['source_code'];
-        reseller['geo_lat'] = '';
-        reseller['geo_lng'] = '';
-        reseller['street_number'] = '';
-        reseller['route'] = '';
-        reseller['locality'] = '';
-        reseller['admin_area_level_2'] = '';
-        reseller['admin_area_level_1'] = '';
-        reseller['country'] = '';
-        reseller['postal_code'] = '';
-        reseller['geo_bounds_south_lat'] = '';
-        reseller['geo_bounds_south_lng'] = '';
-        reseller['geo_bounds_north_lng'] = '';
-        reseller['geo_bounds_north_lat'] = '';
-        reseller['place_id'] = '';
+        console.log('usao u enrich')
+
+        return new Promise(async (resolve)=>{
+            reseller['name'] = item['name'];
+            reseller['reseller_code'] = item['reseller_code'];
+            reseller['country_code'] = item['country_code'];
+            reseller['reseller_type'] = item['reseller_type'];
+            reseller['url'] = item['url'];
+            reseller['logo'] = item['logo'];
+            reseller['votes'] = item['votes'];
+            reseller['rating'] = item['rating'];
+            reseller['phone'] = item['phone'];
+            reseller['full_address'] = item['full_address'];
+            reseller['source_code'] = item['source_code'];
+            reseller['geo_lat'] = '';
+            reseller['geo_lng'] = '';
+            reseller['street_number'] = '';
+            reseller['route'] = '';
+            reseller['locality'] = '';
+            reseller['admin_area_level_2'] = '';
+            reseller['admin_area_level_1'] = '';
+            reseller['country'] = '';
+            reseller['postal_code'] = '';
+            reseller['geo_bounds_south_lat'] = '';
+            reseller['geo_bounds_south_lng'] = '';
+            reseller['geo_bounds_north_lng'] = '';
+            reseller['geo_bounds_north_lat'] = '';
+            reseller['place_id'] = '';
 
 
-        geodata = await that.GeoLocation.GeoApiCall(reseller['full_address']);
+            geodata = await that.GeoLocation.GeoApiCall(reseller['full_address']);
 
 
-        if(geodata){
+            if(geodata){
 
-            reseller['geo_lat'] = geodata['geometry']['location']['lat'];
-            reseller['geo_lng'] = geodata['geometry']['location']['lng'];
-        }
+                reseller['geo_lat'] = geodata[0]['geometry']['location']['lat'];
+                reseller['geo_lng'] = geodata[0]['geometry']['location']['lng'];
+            }
 
-        if('bounds' in geodata['geometry']){
+            if('bounds' in geodata[0]['geometry']){
 
-            reseller['geo_bounds_south_lat'] = geodata['geometry']['bounds']['southwest']['lat'];
-            reseller['geo_bounds_south_lng'] = geodata['geometry']['bounds']['southwest']['lng'];
-            reseller['geo_bounds_north_lng'] = geodata['geometry']['bounds']['northeast']['lat'];
-            reseller['geo_bounds_north_lat'] = geodata['geometry']['bounds']['northeast']['lng'];
-
-        }
-
-        if('place_id' in geodata['geometry']){
-            reseller['place_id'] = geodata['place_id']
-        }
-
-        if('place_id' in geodata){
-            reseller['place_id'] = geodata['place_id']
-        }
-
-        if('address_components' in geodata){
-            for(let address_component in geodata['address_components']){
-
-                if('street_number' in address_component['types']){
-                    reseller['street_number'] = address_component['short_name']
-                }else if('route' in address_component['types']){
-                    reseller['route'] = address_component['short_name']
-                }else if('locality' in address_component['types']){
-                    reseller['locality'] = address_component['short_name']
-                }else if('administrative_area_level_2' in address_component['types']){
-                    reseller['admin_area_level_2'] = address_component['short_name']
-                }else if('administrative_area_level_1' in address_component['types']){
-                    reseller['admin_area_level_1'] = address_component['short_name']
-                }else if('country' in address_component['types']){
-                    reseller['country'] = address_component['short_name']
-                }else if('postal_code' in address_component['types']){
-                    reseller['postal_code'] = address_component['short_name']
-                }
-
-
+                reseller['geo_bounds_south_lat'] = geodata[0]['geometry']['bounds']['southwest']['lat'];
+                reseller['geo_bounds_south_lng'] = geodata[0]['geometry']['bounds']['southwest']['lng'];
+                reseller['geo_bounds_north_lng'] = geodata[0]['geometry']['bounds']['northeast']['lat'];
+                reseller['geo_bounds_north_lat'] = geodata[0]['geometry']['bounds']['northeast']['lng'];
 
             }
-        }
+
+            if('place_id' in geodata[0]['geometry']){
+                reseller['place_id'] = geodata[0]['place_id']
+            }
+
+            if('place_id' in geodata[0]){
+                reseller['place_id'] = geodata[0]['place_id']
+            }
+
+            if('address_components' in geodata[0]){
+                for(let address_component of geodata[0]['address_components']){
+
+                    if(address_component['types'][0] === 'street_number'){
+                        reseller['street_number'] = address_component['short_name']
+                    }else if(address_component['types'][0] ==='route'){
+                        reseller['route'] = address_component['short_name']
+                    }else if(address_component['types'][0] ==='locality'){
+                        reseller['locality'] = address_component['short_name']
+                    }else if(address_component['types'][0] ==='administrative_area_level_2'){
+                        reseller['admin_area_level_2'] = address_component['short_name']
+                    }else if(address_component['types'][0] === 'administrative_area_level_1'){
+                        reseller['admin_area_level_1'] = address_component['short_name']
+                    }else if(address_component['types'][0]==='country'){
+                        reseller['country'] = address_component['short_name']
+                    }else if(address_component['types'][0]==='postal_code'){
+                        reseller['postal_code'] = address_component['short_name']
+                    }
 
 
-        return reseller
+
+                }
+            }
+
+            resolve(reseller);
+        })
+
+
 
 
 

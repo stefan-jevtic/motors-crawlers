@@ -5,18 +5,19 @@ const Query = require('../../Server/DB/DB')
 
 class Detail extends mobilede {
 
-    constructor(type) {
+    constructor(type, singleInstance = false) {
         super();
         this.cheerio = require('cheerio');
         this.DB = new Query();
         this.type = type;
+        this.singleInstance = singleInstance;
     }
 
 
     Run(job) {
         return new Promise(async (resolve, reject) => {
             let url = job.start_url;
-            //url = 'https://suchen.mobile.de/fahrzeuge/details.html?id=269018400&cn=PL&damageUnrepaired=NO_DAMAGE_UNREPAIRED&grossPrice=false&isSearchRequest=true&makeModelVariant1.makeId=12100&pageNumber=1&scopeId=STT&usage=USED&fnai=prev&searchId=85fbfaff-5189-5d8e-5642-1c248f17da82';
+            // url = 'https://suchen.mobile.de/fahrzeuge/details.html?id=269018400&cn=PL&damageUnrepaired=NO_DAMAGE_UNREPAIRED&grossPrice=false&isSearchRequest=true&makeModelVariant1.makeId=12100&pageNumber=1&scopeId=STT&usage=USED&fnai=prev&searchId=85fbfaff-5189-5d8e-5642-1c248f17da82';
             const engine = await Engine.create(this.type, this.EngineOptions)
                 .catch(err => {
                     console.error(err, 'Failed to initialize search engine. Aborting.');
@@ -69,8 +70,11 @@ class Detail extends mobilede {
         try{
             offer_id  = url.split('?id=')[1].split('&')[0];
 
-            attribute_mappings = await that.DB.get_attribute_mappings(that.source_code,'en');
-            attribute_value_mappings = await that.DB.get_attribute_value_mappings(that.source_code,'en');
+            console.log(that.singleInstance);
+            if(!that.singleInstance){
+                attribute_mappings = await that.DB.get_attribute_mappings(that.source_code,'en');
+                attribute_value_mappings = await that.DB.get_attribute_value_mappings(that.source_code,'en');
+            }
 
             title = $('h1[id=rbt-ad-title]').text().trim();
             if(title){
@@ -109,7 +113,8 @@ class Detail extends mobilede {
 
                 if(!attribute_value)
                     continue;
-                attribute_def = that.AttributeDeffinitons(attribute_mappings,attribute_label);
+                if(!that.singleInstance)
+                    attribute_def = that.AttributeDeffinitons(attribute_mappings,attribute_label);
                 if(!attribute_def){
                     console.log('Attribute mappings not found for'+attribute_label+' -  url '+url+'');
                     item['offer_id'] = offer_id;
@@ -157,7 +162,8 @@ class Detail extends mobilede {
                     item['source_id'] = that.source_id;
                     item['attribute_key'] = attribute_def['attribute_key'];
                     if(attribute_def['attribute_type'] === 'select') {
-                        attribute_value_option = that.OptionValue(attribute_value_mappings, attribute_def['attribute_key'], attribute_value);
+                        if(!that.singleInstance)
+                            attribute_value_option = that.OptionValue(attribute_value_mappings, attribute_def['attribute_key'], attribute_value);
                         if (attribute_value_option) {
                             item['value'] = attribute_value_option;
                             item['is_option'] = 1;
@@ -226,7 +232,13 @@ class Detail extends mobilede {
                     resellers.push(res);
                 }
             }
-            that.SaveInfo(items,resellers);
+            if(!that.singleInstance)
+                that.SaveInfo(items,resellers);
+
+            //for Single instance
+            if(that.singleInstance)
+                return callback(null, {items:items, resellers:resellers})
+
             return callback(null, 'done')
         }
         catch(e){
