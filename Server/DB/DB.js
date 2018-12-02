@@ -1,13 +1,3 @@
-/*
-* todo: povezati google api sa reseller i testirati api i dovrsiti reseller_enrich
-*
-*
-*
-* */
-
-
-
-
 const DB = require('./../../Models/index');
 const moment = require('moment');
 const offers = require('./../../Models/index').offers;
@@ -16,10 +6,7 @@ const GeoApi = require('./../../Utils/GoogleGeoApi/GoogleGeoApi');
 class Database {
 
     constructor(){
-
         this.GeoLocation = new GeoApi();
-
-
     }
 
     getListingLinks(){
@@ -228,7 +215,6 @@ class Database {
             if(reseller.length){
                 reseller_id = reseller['id'];
             }else {
-                console.log('usao u resseler');
                 let reseler_data = await that.enrich_reseller(reseller_item[0]);
                 reseller_id = await that.create_reseller(reseler_data);
 
@@ -366,7 +352,6 @@ class Database {
 
     async enrich_reseller(item){
         let reseller = {},geodata,settingsApi,that=this;
-        console.log('usao u enrich')
 
         return new Promise(async (resolve)=>{
             reseller['name'] = item['name'];

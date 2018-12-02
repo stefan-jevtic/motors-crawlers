@@ -70,7 +70,6 @@ class Detail extends mobilede {
         try{
             offer_id  = url.split('?id=')[1].split('&')[0];
 
-            console.log(that.singleInstance);
             if(!that.singleInstance){
                 attribute_mappings = await that.DB.get_attribute_mappings(that.source_code,'en');
                 attribute_value_mappings = await that.DB.get_attribute_value_mappings(that.source_code,'en');
@@ -235,7 +234,6 @@ class Detail extends mobilede {
             if(!that.singleInstance)
                 that.SaveInfo(items,resellers);
 
-            //for Single instance
             if(that.singleInstance)
                 return callback(null, {items:items, resellers:resellers})
 
