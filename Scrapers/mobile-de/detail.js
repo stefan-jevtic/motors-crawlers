@@ -17,7 +17,7 @@ class Detail extends mobilede {
     Run(job) {
         return new Promise(async (resolve, reject) => {
             let url = job.start_url;
-            // url = 'https://suchen.mobile.de/fahrzeuge/details.html?id=269018400&cn=PL&damageUnrepaired=NO_DAMAGE_UNREPAIRED&grossPrice=false&isSearchRequest=true&makeModelVariant1.makeId=12100&pageNumber=1&scopeId=STT&usage=USED&fnai=prev&searchId=85fbfaff-5189-5d8e-5642-1c248f17da82';
+            // url = 'https://suchen.mobile.de/fahrzeuge/details.html?id=271300391&cn=IT';
             const engine = await Engine.create(this.type, this.EngineOptions)
                 .catch(err => {
                     console.error(err, 'Failed to initialize search engine. Aborting.');
@@ -129,7 +129,7 @@ class Detail extends mobilede {
                 else if (attribute_def['attribute_key'] === 'ignore'){
                     console.log('ignore attribite '+attribute_label);
                 }
-                else if(attribute_def['attribute_key'] === 'first registration'){
+                else if(attribute_def['attribute_key'] === 'first_registration'){
                     item['offer_id'] = offer_id;
                     item['source_id'] = that.source_id;
                     item['attribute_key'] = 'first_registration';
@@ -275,16 +275,16 @@ class Detail extends mobilede {
         let att;
         switch (attribute_key) {
             case 'mileage':
-                att = attribute_value.split(' ')[0].replace(',', '').replace('.', '');
+                att = attribute_value.replace(/[^0-9]/g, '')
                 break;
             case 'power':
-                att = attribute_value.split(' ')[0].replace(',', '').replace('.', '');
+                att = attribute_value.split(/\s+/g)[0].replace(/[^0-9]/g, '');
                 break;
             case 'cubic_capacity':
-                att = attribute_value.split(' ')[0].replace(',', '').replace('.', '');
+                att = attribute_value.replace(/[^0-9]/g, '')
                 break;
             case 'gvw':
-                att = attribute_value.split(' ')[0].replace(',', '').replace('.', '');
+                att = attribute_value.replace(/[^0-9]/g, '')
                 break;
             default:
                 att = attribute_value;
