@@ -30,11 +30,15 @@ global.loger = winston.createLogger({
 })
 
 global.AlertSvc = message => {
-    const slack = new Slack(process.env.SLACK_HOOK);
-    const compositeMessage = '['+os.hostname()+']['+process.env.ENV+'] '+message;
-    slack.send({
-        text: compositeMessage,
-        channel: '#motors-alerts',
-        username: 'MotorsBot'
-    });
+    return new Promise((resolve, reject) => {
+        const slack = new Slack(process.env.SLACK_HOOK);
+        const compositeMessage = '['+os.hostname()+']['+process.env.ENV+'] '+message;
+        slack.send({
+            text: compositeMessage,
+            channel: '#motors-alerts',
+            username: 'MotorsBot'
+        })
+            .then(resolve)
+            .catch(reject);
+    })
 }

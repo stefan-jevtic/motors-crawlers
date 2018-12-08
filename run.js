@@ -17,11 +17,11 @@ const Worker = autoloader.load(`${__dirname}/Workers/`)[`${worker}.worker`];
 const w = new Worker(spider, engine);
 w.crawl()
 
-process.on('unhandledRejection', reason => {
+process.on('unhandledRejection', async reason => {
     global.loger.error(`Unhandled Rejection: ${reason}`);
     if(_.isObject(reason) && reason.message)
-        global.AlertSvc('Motors Listing Worker Unhandled Rejection: '+reason.message);
+        await global.AlertSvc(`Motors ${worker} worker Unhandled Rejection: `+reason.message);
     else
-        global.AlertSvc('Motors Listing Worker Unhandled Rejection: '+reason);
+        await global.AlertSvc(`Motors ${worker} worker Unhandled Rejection: `+reason);
     process.exit(1);
 });
