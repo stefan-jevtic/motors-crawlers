@@ -222,7 +222,10 @@ class Detail extends mobilede {
                 if(reseller['phone'])reseller['phone']=reseller['phone'].replace('Phone: ', '')
                 reseller['rating'] = $('a.amount-of-ratings-link span.star-rating-s').eq(0).attr('data-rating');
                 reseller['votes'] =  $('span.amount-of-ratings').text().trim();
-                if(reseller['votes'])reseller['votes']=reseller['votes'].split(' ')[0];
+                if(reseller['votes'])
+                    reseller['votes']=reseller['votes'].replace(/[^0-9]/g, '')
+                else
+                    reseller['votes']=0;
                 reseller['source_code'] = that.source_code;
                 if((!reseller['name'] || !reseller['full_address']) && !reseller['reseller_code'])
                     console.log('Cannot identify reseller at this url:'+url);

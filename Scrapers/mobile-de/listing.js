@@ -104,28 +104,34 @@ class Listing extends mobilede {
                 url = 'https://suchen.mobile.de/fahrzeuge/details.html?id='+offer_id+'&lang=en';
                 hasOfferPrice = $(element[i]).find('.price-block span.h2.u-text-line-through').text();
                 usage = $('span.new-headline-label').text().trim();
-                if(usage.indexOf('New')>-1)condition='NEW';
-                else condition='USED';
+                if(usage.indexOf('New') > -1)
+                    condition = 'NEW';
+                else
+                    condition = 'USED';
                 if(!hasOfferPrice){
                     price_net =  $(element[i]).find('a.result-item span.u-block').eq(0).text().replace(/[^0-9\,]/gi, '');
-                    if(price_net)price_net=price_net.replace(',','');
+                    if(price_net)
+                        price_net = price_net.replace(',','');
                     price_gross = $(element[i]).find('a.result-item span.u-block').eq(1).text().replace(/[^0-9\,]/gi, '');
                     if(price_gross)
                         price_gross=price_gross.replace(',','');
                     else
                         price_gross=null;
                     vat = $(element[i]).find('a.result-item span.u-block').eq(2).text().replace(/[^0-9\,]/gi, '');
-                    if(vat)vat=
-                        vat.replace(',','');
+                    if(vat)
+                        vat = vat.replace(',','');
                     else
-                        vat=null;
+                        vat = null;
                 }else{
                     price_net =  $(element[i]).find('a.result-item span.u-block').eq(1).text().replace(/[^0-9\,]/gi, '');
-                    if(price_net)price_net=price_net.replace(',','');
+                    if(price_net)
+                        price_net = price_net.replace(',','');
                     price_gross = $(element[i]).find('a.result-item span.u-block').eq(2).text().replace(/[^0-9\,]/gi, '');
-                    if(price_gross)price_gross=price_gross.replace(',','');
+                    if(price_gross)
+                        price_gross = price_gross.replace(',','');
                     vat = $(element[i]).find('a.result-item span.u-block').eq(3).text().replace(/[^0-9\,]/gi, '');
-                    if(vat)vat=vat.replace(',','');
+                    if(vat)
+                        vat = vat.replace(',','');
                 }
                 url_obj['offer_id']= offer_id;
                 url_obj['condition'] = condition;

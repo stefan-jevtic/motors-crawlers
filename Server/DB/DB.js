@@ -40,7 +40,6 @@ class Database {
 
 
     insertListing(item,spider_name,origin_url){
-
         this.archive_offers(origin_url);
 
         this.delete_offers(origin_url);
@@ -70,7 +69,7 @@ class Database {
 
             this.insert_offer_mappings(item[key]['origin_url'],item[key]['source_id'],item[key]['offer_id'],item[key]['brand_id'],item[key]['brand']);
 
-            this.enqueue_detail_urls(item[key]['url'],'mobile-de');
+            this.enqueue_detail_urls(item[key]['url'],spider_name);
         }
     }
 
