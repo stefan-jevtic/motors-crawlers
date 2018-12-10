@@ -59,20 +59,17 @@ class DetailWorker {
                 .catch(async err => {
                     global.loger.error(err)
                     global.AlertSvc(`${this.spider} detail job error ${job.id}: ${err.message}`)
+                    let obj = { status: 'READY' };
+                    if(err.message.indexOf('waiting for selector "div.antigate_solver.recaptcha.solved" failed') === -1)
+                        obj.num_failures = job.num_failures + 1;
                     if(job.num_failures < 5){
-                        await this.push(job.id, {
-                            status: 'READY',
-                            num_failures: job.num_failures+1
-                        })
+                        await this.push(job.id, obj);
                         reject(err)
                     }
                     else {
                         global.loger.warn(`${this.spider} detail job: ${job.id} skipped for too many failures`)
                         global.AlertSvc(`${this.spider} detail job: ${job.id} skipped for too many failures`)
-                        await this.push(job.id, {
-                            status: 'READY',
-                            num_failures: job.num_failures+1
-                        })
+                        await this.push(job.id, obj);
                         reject(err)
                     }
                 })

@@ -11,6 +11,7 @@ class Detail extends mobilede {
         this.DB = new Query();
         this.type = type;
         this.singleInstance = singleInstance;
+        this.cookies = null;
     }
 
 
@@ -26,6 +27,8 @@ class Detail extends mobilede {
             engine.get(url, {})
                 .then(async response => {
                     try {
+                        if(this.cookies)
+                            await engine.request.Page.setCookie(...this.cookies)
                         let $ = this.cheerio.load(response.html);
                         if($('title').text().indexOf('Are you a human')>-1){
                             global.loger.warn('CAPTCHA OCCURS!')
@@ -34,6 +37,7 @@ class Detail extends mobilede {
                             await engine.request.Page.click('.btn.btn--orange.u-full-width');
                             await engine.request.Page.waitForNavigation({'timeout':200000});
                             global.loger.debug('CAPTCHA SOLVED, CONTINUING...')
+                            this.cookies = await engine.request.Page.cookies()
                             let Body  = await engine.request.Page.content();
                             let $2 = this.cheerio.load(Body);
                             this.ParsePage($2, url, (err, status) => {
@@ -115,7 +119,6 @@ class Detail extends mobilede {
                 if(!that.singleInstance)
                     attribute_def = that.AttributeDeffinitons(attribute_mappings,attribute_label);
                 if(!attribute_def){
-                    console.log('Attribute mappings not found for'+attribute_label+' -  url '+url+'');
                     item['offer_id'] = offer_id;
                     item['source_id'] = that.source_id;
                     item['attribute_key'] = attribute_label;
